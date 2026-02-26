@@ -1,0 +1,56 @@
+{% extends "malleusui/base.html" %}
+
+{% block content %}
+
+<section class="hero is-fullheight">
+      <div class="hero-body">
+        <div class="container has-text-centered">
+          <div class="column is-4 is-offset-4">
+            <div class="box p-6 mb-0">
+              <p class="subtitle is-4 pb-5">Please enter your username to continue</p>
+                {% if error is not None %}
+                <div class="notification is-danger">
+                {{ error }}
+                </div>
+                {% endif %}
+                <form method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <div class="field">
+                    <p class="control has-icons-left has-icons-right">
+                        <input class="input is-medium" type="text" placeholder="Username" name="username"/>
+                        <span class="icon is-medium is-left">
+                            <span class="mdi mdi-account"></span>
+                        </span>
+
+                    </p>
+                    </div>
+                    <!-- <div class="field">
+                    <p class="control has-icons-left">
+                        <input class="input is-medium" type="password" placeholder="Password" />
+                        <span class="icon is-small is-left">
+                        <i class="fas fa-lock"></i>
+                        </span>
+                    </p>
+                    </div> -->
+                    <div class="column is-flex is-half is-offset-one-quarter">
+                    <button class="button is-block is-info is-medium is-fullwidth has-text-weight-normal has-text-dark">
+                        Login
+                    </button>
+                    </div>
+                    <div class="column is-flex is-half is-offset-one-quarter">
+                    <a class="button is-fullwidth " href="/register">Register</a>
+                    </div>
+                </form>
+            </div>
+            <!-- <div class="column has-text-white has-text-weight-normal pb-0">
+              <a href="#">Sign Up</a> · <a href="#">Forgot Password</a> ·
+              <a href="#">Need Help?</a>
+            </div> -->
+        
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+{% endblock %}

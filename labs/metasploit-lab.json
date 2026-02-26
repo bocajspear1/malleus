@@ -1,0 +1,29 @@
+{
+    "id": "metasploit-lab",
+    "name": "Metasploit Lab",
+    "description": "Learn the basics of recon tools like NMap and using Metasploit to exploit and explore a vulnerable target",
+    "hosts":[ 
+        {
+            "template": "kali-metasploit",
+            "hostname": "kali",
+            "networks": [
+                "int"
+            ],
+            "port_forward": [
+                "127.0.0.1:tcp/22"
+            ]
+        },
+        {
+            "template": "tomcat-vuln",
+            "hostname": "target",
+            "networks": [
+                "int"
+            ]
+        }
+    ],
+    "networks": {
+        "int": {
+            "private": true
+        }
+    }
+}

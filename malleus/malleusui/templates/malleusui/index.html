@@ -1,0 +1,78 @@
+{% extends "malleusui/base.html" %}
+
+{% block content %}
+<nav class="navbar is-info">
+    <div class="container">
+        <div class="navbar-brand">
+            <span class="navbar-item" href="#">
+                Malleus
+            </span>
+            <!-- <span class="navbar-burger burger" data-target="navbarMenu">
+            <span></span>
+            <span></span>
+            <span></span>
+            </span> -->
+        </div>
+    <div id="navbarMenu" class="navbar-menu">
+        <div class="navbar-end">
+            <a class="navbar-item" href="">
+                Files
+            </a>
+            <a class="navbar-item" href="">
+                Access
+            </a>
+            <a class="navbar-item" href="{% url 'logout' %}">
+                Logout
+            </a>
+            
+            <!-- <a class="navbar-item">
+                Examples
+            </a>
+            <a class="navbar-item">
+                Features
+            </a>
+            <a class="navbar-item">
+                Team
+            </a>
+            <a class="navbar-item">
+                Archives
+            </a>
+            <a class="navbar-item">
+                Help
+            </a> -->
+        </div>
+    </div>
+    </div>
+</nav>
+
+ <div class="container">
+    <div class="section">
+        <div class="columns">
+            <div class="column has-text-centered">
+            <h1 class="title" style="color: ghostwhite;">Labs</h1><br>
+            </div>
+        </div>
+        <div class="row columns is-multiline">
+        {% for lab in labs %}
+            <div class="card">
+                <header class="card-header">
+                    <p class="card-header-title">{{ lab.name }}</p>
+                </header>
+                <div class="card-content">
+                    <div class="content">
+                        {{ lab.description }}
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    {% if lab.running %}
+                    <a href="#" class="card-footer-item">Manage</a>
+                    {% else %}
+                    <a href="{% url 'create' lab.id %}" class="card-footer-item">Start</a>
+                    {% endif %}
+                </footer>
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
