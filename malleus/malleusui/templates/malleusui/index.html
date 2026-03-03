@@ -1,49 +1,6 @@
-{% extends "malleusui/base.html" %}
+{% extends "malleusui/baseapp.html" %}
 
-{% block content %}
-<nav class="navbar is-info">
-    <div class="container">
-        <div class="navbar-brand">
-            <span class="navbar-item" href="#">
-                Malleus
-            </span>
-            <!-- <span class="navbar-burger burger" data-target="navbarMenu">
-            <span></span>
-            <span></span>
-            <span></span>
-            </span> -->
-        </div>
-    <div id="navbarMenu" class="navbar-menu">
-        <div class="navbar-end">
-            <a class="navbar-item" href="">
-                Files
-            </a>
-            <a class="navbar-item" href="">
-                Access
-            </a>
-            <a class="navbar-item" href="{% url 'logout' %}">
-                Logout
-            </a>
-            
-            <!-- <a class="navbar-item">
-                Examples
-            </a>
-            <a class="navbar-item">
-                Features
-            </a>
-            <a class="navbar-item">
-                Team
-            </a>
-            <a class="navbar-item">
-                Archives
-            </a>
-            <a class="navbar-item">
-                Help
-            </a> -->
-        </div>
-    </div>
-    </div>
-</nav>
+{% block appcontent %}
 
  <div class="container">
     <div class="section">
@@ -65,9 +22,19 @@
                 </div>
                 <footer class="card-footer">
                     {% if lab.running %}
-                    <a href="#" class="card-footer-item">Manage</a>
+                    <a href="{% url 'manage' lab.id %}" class="card-footer-item">
+                        <span class="icon is-medium is-left">
+                            <span class="mdi mdi-cog"></span>
+                        </span>
+                        Manage
+                    </a>
                     {% else %}
-                    <a href="{% url 'create' lab.id %}" class="card-footer-item">Start</a>
+                    <a href="{% url 'create' lab.id %}" class="card-footer-item">
+                        <span class="icon is-medium is-left">
+                            <span class="mdi mdi-play"></span>
+                        </span>
+                        Start
+                    </a>
                     {% endif %}
                 </footer>
             </div>

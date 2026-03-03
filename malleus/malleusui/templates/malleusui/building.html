@@ -1,0 +1,47 @@
+{% extends "malleusui/base.html" %}
+
+{% block content %}
+<div class="container"><div class="container">
+    <div class="section">    
+        <progress id="progress-bar" class="progress is-primary" value="0" max="100">Waiting...</progress>
+        <div class="notification is-link" id="status-text">
+           
+        </div>
+        
+    </div>    
+</div>
+<script>
+    var operations = {
+        {% for operation_id, hostname in operations.items %}
+            '{{ operation_id }}': '{{ hostname }}',
+        {% endfor %}
+    };
+
+    console.log(operations)
+
+    async function get_statuses() {
+
+        var counter = 0;
+        var count_to = Object.keys(operations).length + 1;
+
+        for (const operation_id in operations) {
+            document.getElementById("status-text").textContent = "Deploying " + operations[operation_id];
+            counter += 1;
+            document.getElementById("progress-bar").setAttribute("value", (counter/count_to)*100);
+            var resp = await fetch("/wait/" +operation_id);
+            const data = await resp.json();
+            console.log(operation_id, operations[operation_id], data);
+            
+        }
+        document.getElementById("progress-bar").setAttribute("value", 100);
+        document.getElementById("status-text").textContent = "Done!";
+    }
+
+    get_statuses();
+
+    console.log("hi there");
+    
+
+    
+</script>
+{% endblock %}

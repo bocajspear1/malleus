@@ -1,3 +1,6 @@
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 import requests
 
 from .project import IncusProject
@@ -17,6 +20,15 @@ class IncusClient():
     def post(self, path, json_data=None):
         return self._session.post(f"https://{self._host}:{self._port}{path}", verify=self._verify, json=json_data)
     
+    def put(self, path, json_data=None):
+        return self._session.put(f"https://{self._host}:{self._port}{path}", verify=self._verify, json=json_data)
+    
+    def patch(self, path, json_data=None):
+        return self._session.patch(f"https://{self._host}:{self._port}{path}", verify=self._verify, json=json_data)
+    
+    def delete(self, path):
+        return self._session.delete(f"https://{self._host}:{self._port}{path}", verify=self._verify)
+    
     def status(self):
         return self._get("/1.0").json()
     
@@ -32,10 +44,22 @@ class IncusClient():
         else:
             return None
         
-    def create_project(self, project_name, description, isolate_images=True, isolate_networks=False, isolate_storage=True, isolate_profiles=True, restricted=True):
-        proj = IncusProject.new(self, project_name, description, isolate_images=isolate_images, isolate_networks=isolate_networks, isolate_storage=isolate_storage, isolate_profiles=isolate_profiles, restricted=restricted)
+    def create_project(self, project_name, description, isolate_images=True, isolate_networks=False, isolate_storage=True, isolate_profiles=True, restricted=True, proxy=False, snapshots=False):
+        proj = IncusProject.new(self, project_name, description, isolate_images=isolate_images, 
+                                isolate_networks=isolate_networks, isolate_storage=isolate_storage, isolate_profiles=isolate_profiles, restricted=restricted, proxy=proxy, snapshots=snapshots)
         return proj
     
+    def get_operation(self, operation_id):
+        resp = self.get(f"/1.0/operations/{operation_id}")
+        if resp.status_code == 200:
+            return resp.json()['metadata']
+        else:
+            return None
+        
+    def await_operation(self, operation_id):
+        resp = self.get(f"/1.0/operations/{operation_id}/wait?timeout=-1")
+        print(resp.json())
+
     def get_user(self, username):
         res = self._get(f"/1.0/certificates?filter=name+eq+{username}&recursion=1")
 

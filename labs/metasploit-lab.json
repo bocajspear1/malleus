@@ -9,8 +9,8 @@
             "networks": [
                 "int"
             ],
-            "port_forward": [
-                "127.0.0.1:tcp/22"
+            "port_forwards": [
+                "tcp:127.0.0.1:22"
             ]
         },
         {

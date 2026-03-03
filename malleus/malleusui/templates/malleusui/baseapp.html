@@ -1,0 +1,52 @@
+{% extends "malleusui/base.html" %}
+
+{% block content %}
+<nav class="navbar is-info">
+    <div class="container">
+        <div class="navbar-brand">
+            <span class="navbar-item" href="#">
+                Malleus
+            </span>
+            <!-- <span class="navbar-burger burger" data-target="navbarMenu">
+            <span></span>
+            <span></span>
+            <span></span>
+            </span> -->
+        </div>
+    <div id="navbarMenu" class="navbar-menu">
+        <div class="navbar-end">
+            <a class="navbar-item" href="">
+                Files
+            </a>
+            <a class="navbar-item" href="">
+                Access
+            </a>
+            <a class="navbar-item" href="{% url 'logout' %}">
+                Logout
+            </a>
+            
+            <!-- <a class="navbar-item">
+                Examples
+            </a>
+            <a class="navbar-item">
+                Features
+            </a>
+            <a class="navbar-item">
+                Team
+            </a>
+            <a class="navbar-item">
+                Archives
+            </a>
+            <a class="navbar-item">
+                Help
+            </a> -->
+        </div>
+    </div>
+    </div>
+</nav>
+
+{% block appcontent %}
+
+{% endblock %}
+
+{% endblock %}

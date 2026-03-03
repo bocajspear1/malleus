@@ -14,7 +14,7 @@ class IncusProject():
         return ret_list
     
     @classmethod
-    def new(cls, client, project_name, description, isolate_images=True, isolate_networks=False, isolate_storage=True, isolate_profiles=True, restricted=True):
+    def new(cls, client, project_name, description, isolate_images=True, isolate_networks=False, isolate_storage=True, isolate_profiles=True, restricted=True, proxy=False, snapshots=False):
 
         config = {
             "config": {
@@ -24,34 +24,60 @@ class IncusProject():
                 "features.profiles": str(isolate_profiles),
                 "features.storage.volumes": str(isolate_storage),
                 "features.storage.buckets": str(isolate_storage),
-                "restricted": str(restricted)
+                "restricted": str(restricted),
             },
             "description": description,
             "name": project_name
         }
+
+        if proxy:
+            config['config']['restricted.devices.proxy'] = 'allow'
+        if snapshots:
+            config['config']['restricted.snapshots'] = 'allow'
         resp = client.post(f"/1.0/projects", json_data=config)
-        print(resp.json())
-        return resp.json()['metadata']
+
+        print(resp.status_code, resp.json())
+        
+        if resp.status_code == 201:
+            ret_inst = cls(client, project_name)
+            ret_inst.load()
+            return ret_inst
+        else:
+            return None
 
     def __init__(self, client, project_name="default"):
         self._client = client
         self._name = project_name
-        self._data = {}
+        self._description = ""
+        self._config = {}
         self._resources = []
+        self._loaded = False
 
     def load(self):
         resp = self._client.get(f"/1.0/projects/{self._name}")
         print(resp)
         if resp.status_code == 200:
-            self._data = resp.json()['metadata']
-            print(self._data)
-            self._resources = self._data['used_by']
+            metadata = resp.json()['metadata']
+            self._description = metadata['description']
+            self._config = metadata['config']
+            print(self._config)
+            self._resources = metadata['used_by']
+            self._loaded = True
+            return True
+        else:
+            return False
+        
+    def delete(self):
+        resp = self._client.delete(f"/1.0/projects/{self._name}")
+        if resp.status_code == 200:
             return True
         else:
             return False
     
 
     def get_instances(self):
+        if not self._loaded:
+            raise ValueError("Project not loaded")
         instance_list = []
         for item in self._resources:
             if item.startswith("/1.0/instances/"):
@@ -59,6 +85,8 @@ class IncusProject():
         return instance_list
     
     def get_instance(self, instance_name):
+        if not self._loaded:
+            raise ValueError("Project not loaded")
         inst = IncusInstance(self._client, instance_name, self._name)
         ok = inst.load()
         if not ok:
@@ -67,19 +95,64 @@ class IncusProject():
 
     
     def create_instance(self, instance_name, template_name, vm=False, networks=None):
-        return IncusInstance.new(self._client, instance_name, "", template_name, self._name, vm=vm, networks=networks)
+        if not self._loaded:
+            raise ValueError("Project not loaded")
+        
+        internal_network_list = []
+        
+        for network_name in networks:
+            print("looking for", network_name)
+            network = self.get_network(network_name)
+            if network is None:
+                raise ValueError("Invalid network")
+            print("GOT", network.name, network.internal_name)
+            internal_network_list.append(network.internal_name)
+
+        return IncusInstance.new(self._client, instance_name, f"Instance of {template_name} for project {self._name}", template_name, self._name, vm=vm, networks=internal_network_list)
 
     def get_networks(self):
         pass
 
     def get_network(self, network_name):
+        if not self._loaded:
+            raise ValueError("Project not loaded")
+        print(network_name)
         net = IncusNetwork(self._client, network_name, self._name)
         ok =  net.load()
-        print(ok)
         if not ok:
             return None
         else:
+            print("GETNET", net.name, net.internal_name)
             return net
         
     def create_network(self, network_name, description, network_type="bridge", ipv4_addr=None, ipv4_nat=True):
-        return IncusNetwork.new(self._client, network_name, description, self._name, network_type=network_type, ipv4_addr=ipv4_addr, ipv4_nat=ipv4_nat)
+        if not self._loaded:
+            raise ValueError("Project not loaded")
+        if network_type == "ovn":
+            return IncusNetwork.new(self._client, network_name, description, self._name, network_type=network_type, ipv4_addr=ipv4_addr, ipv4_nat=ipv4_nat)
+        else:
+            new_net = IncusNetwork.new(self._client, network_name, description, self._name, network_type=network_type, ipv4_addr=ipv4_addr, ipv4_nat=ipv4_nat)
+            print("NEW", new_net.name, new_net.internal_name)
+
+            net_list = [new_net.internal_name]
+            if "restricted.networks.access" in self._config:
+                net_list += self._config["restricted.networks.access"].split(",")
+            self.update_config({
+                "restricted.networks.access": ",".join(set(net_list))
+            })
+            return new_net
+
+    def update_config(self, new_config):
+        if not self._loaded:
+            raise ValueError("Project not loaded")
+        
+        for new_key in new_config:
+            self._config[new_key] = new_config[new_key]
+
+        resp = self._client.patch(f"/1.0/projects/{self._name}", json_data={
+            "config": self._config
+        })
+        if resp.status_code == 200:
+            return True
+        else:
+            return False

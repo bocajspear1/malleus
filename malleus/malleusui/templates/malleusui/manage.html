@@ -1,0 +1,38 @@
+{% extends "malleusui/baseapp.html" %}
+
+{% block appcontent %}
+<div class="container"><div class="container">
+    <div class="section">    
+        <h1>{{ lab.name }}</h1>
+
+        {% for host in lab.hosts %}
+
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">{{ host.hostname }}</p>
+                <span class="card-header-icon">
+                    <span class="icon">
+                        <span class="mdi mdi-server"></span>
+                    </span>
+                </span>
+            </header>
+            <div class="card-content">
+                <div class="content">
+                    <ul>
+                    {% for key, data in host.port_forwards.items %}
+                        <li>{{ data.listen }} to internal {{ data.connect_to }} </li>
+                    {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <!-- <footer class="card-footer">
+                <a href="#" class="card-footer-item">Save</a>
+                <a href="#" class="card-footer-item">Edit</a>
+                <a href="#" class="card-footer-item">Delete</a>
+            </footer> -->
+        </div>
+
+        {% endfor %}
+    </div>    
+</div>
+{% endblock %}
