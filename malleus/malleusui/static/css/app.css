@@ -1,0 +1,3 @@
+.long-notification {
+  word-break: break-word; /* or overflow-wrap: break-word; */
+}

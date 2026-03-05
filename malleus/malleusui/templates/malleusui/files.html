@@ -1,0 +1,33 @@
+{% extends "malleusui/baseapp.html" %}
+
+{% block appcontent %}
+<div class="container"><div class="container">
+    <div class="section">    
+        <h1 class="title">Files</h1>
+
+        <div class="block">
+            <table class="table is-striped is-hoverable is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>Filename</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% load static %}
+                    {% for file in files %}
+                    <tr>
+                        <td><a href="{% static file.path %}">{{ file.name }}</a></td>
+                    </tr>
+       
+
+                    {% endfor %}
+                    
+                  
+                </tbody>
+            </table>
+        </div>
+
+        
+    </div>    
+</div>
+{% endblock %}

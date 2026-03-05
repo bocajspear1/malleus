@@ -15,10 +15,13 @@
         </div>
     <div id="navbarMenu" class="navbar-menu">
         <div class="navbar-end">
-            <a class="navbar-item" href="">
+            <a class="navbar-item" href="{% url 'index' %}">
+                Home
+            </a>
+            <a class="navbar-item" href="{% url 'files' %}">
                 Files
             </a>
-            <a class="navbar-item" href="">
+            <a class="navbar-item" href="{% url 'access' %}">
                 Access
             </a>
             <a class="navbar-item" href="{% url 'logout' %}">

@@ -11,4 +11,6 @@ urlpatterns = [
     path("manage/<str:project>", views.manage, name="manage"),
     path("delete/<str:project>", views.delete, name="delete"),
     path("wait/<str:operation_id>", views.wait, name="wait"),
+    path("access", views.access, name="access"),
+    path("files", views.files, name="files"),
 ]

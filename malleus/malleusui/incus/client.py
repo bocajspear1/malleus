@@ -71,9 +71,9 @@ class IncusClient():
         else:
             return None
         
-    def create_user(self, username):
-        res = self._post("/1.0/certificates", json= {
-                "name": username,
+    def create_user_cert(self, username, projects=None):
+        res = self.post("/1.0/certificates", json_data={
+            "name": username,
             "description": f"User {username}",
             "token": True,
             "type": "client",
@@ -81,6 +81,11 @@ class IncusClient():
             "trust_token": "",
             "certificate": "",
             "trust_token": "",
-            "projects": None
+            "projects": projects
         })
-        print(res.json())
+
+        if res.status_code == 202:
+            return res.json()['metadata']['metadata']
+        else:
+            print(res.status_code, res.json())
+            return None

@@ -1,6 +1,9 @@
 import re
 import socket
 import random
+import base64
+import json
+import os
 
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
@@ -205,10 +208,57 @@ def delete(request, project):
 
     project.delete()
 
+
+@login_required
+def access(request):
+    client = IncusClient(settings.INCUS_SERVER, settings.INCUS_CERT, settings.INCUS_KEY, verify=settings.INCUS_VERIFY)
+
+    loader = LabLoader("../labs")
+    labs = loader.load()
+
+    projects = client.get_projects()
+
+    user_projects = []
+
+    for lab_name in labs:
+        lab = loader.get(lab_name)
+        for project in projects:
+            if project == f"{request.user.username}--{lab_name}":
+                user_projects.append(project)
+        
+
+    resp = client.create_user_cert(request.user.username, projects=user_projects)
+    print(resp)
+
+    # {"client_name":"testme","fingerprint":"7dfd30939b994ea79db37a1757f6ae4368a2c5f67a2f543270796ea8545dc4a5","addresses":["192.168.6.18:8443","10.20.40.1:8443","[fd42:8149:2634:c3ed::1]:8443","[fd42:60f4:19d5:811c::1]:8443"],"secret":"043784f43f6ed33c2260e9da8b46eec06fda22ebbb8abe52ad9c25b67b7b24f7","expires_at":"0001-01-01T00:00:00Z"}
     
 
+    data_dict = {"client_name": request.user.username,
+                 "fingerprint":resp['fingerprint'],
+                 "addresses":resp['addresses'],
+                 "secret":resp['secret'],
+                 "expires_at":"0001-01-01T00:00:00Z"}
     
+    data_str = base64.b64encode(json.dumps(data_dict).encode()).decode()
+    
+    context={'user_key': data_str}
+    print(context)
+    return render(request, "malleusui/access.html", context)   
 
+
+@login_required
+def files(request):
+
+    static_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "static", "files")
+
+    file_list = []
+
+    for item in os.listdir(static_path):
+        file_list.append({"path": f"files/{item}", "name": item})
+
+    context={'files': file_list}
+    print(context)
+    return render(request, "malleusui/files.html", context)   
 
 def login(request):
     if request.method =='POST':

@@ -1,0 +1,116 @@
+{% extends "malleusui/baseapp.html" %}
+
+{% block appcontent %}
+<div class="container">
+    <div class="section"> 
+        <div class="tabs is-centered">
+            <ul>
+                <li data-tab="incus-client" class="is-active" id="incus-client-tab">
+                    <a >
+                        <span class="icon is-small">
+                            <span class="icon">
+                                <span class="mdi mdi-cog-transfer"></span>
+                            </span>
+                        </span>
+                        <span>Incus Client</span>
+                    </a>
+                </li>
+                <li data-tab="ssh-putty" id="ssh-putty-tab">
+                    <a>
+                        <span class="icon is-small">
+                            <span class="icon">
+                                <span class="mdi mdi-console-network"></span>
+                            </span>
+                        </span>
+                        <span>SSH (Putty)</span>
+                    </a>
+                </li>
+                <li data-tab="ssh-linux" id="ssh-linux-tab">
+                    <a>
+                        <span class="icon is-small">
+                            <span class="icon">
+                                <span class="mdi mdi-linux"></span>
+                            </span>
+                        </span>
+                        <span>SSH (OpenSSH/Linux)</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div id="incus-client">
+            <h1 class="title">Incus Client</h1>
+            <div class="block">
+                The native client for Incus (which Malleus is using behind the scenes) provides CLI access to manage and control the containers and VMs in your labs.
+            </div>
+            <h2 class="subtitle">1. Download Incus Client</h2>
+            <div class="block">
+                Download the Incus client (not agent!) for your operating system. Check the <a href="{% url 'files' %}">Files</a> page.
+            </div>
+            <h2 class="subtitle">2. Register a Remote</h2>
+            <div class="block">
+                With the Incus client, register a "remote" to access the server. When prompted for a token, use the token below.
+                <pre>incus[.exe] remote add &lt;NAME&gt; &lt;SERVER_IP&gt;</pre>
+
+                If the server is at "192.168.9.10":
+                <pre>incus[.exe] remote add malleus 192.168.9.10</pre>
+            </div>
+            <div class="notification is-link long-notification">
+                {{ user_key }}
+            </div>
+            <h2 class="subtitle">3. Select Project</h2>
+            <div class="block">
+                Each lab is a an Incus project, list projects available to you with:
+                <pre>incus[.exe] project list</pre>
+
+                Switch to the project to manage and access the lab's systems. A lab project's name is &lt;USERNAME&gt;-&lt;LAB-NAME&gt;
+                <pre>incus[.exe] project switch &lt;PROJECT&gt;</pre>
+            </div>
+            <h2 class="subtitle">4. List Systems</h2>
+            <div class="block">
+                List the systems, referred to as "instances" in Incus, within the project with:
+                <pre>incus[.exe] list</pre>
+            </div>
+            <h2 class="subtitle">5. Access Console</h2>
+            <div class="block">
+                You can access a terminal for an instance with:
+                <pre>incus[.exe] exec &lt;INSTANCE-NAME&gt; -- bash -i</pre>
+                You could replace "bash -i" with any command in the instance.
+            </div>
+            <div class="notification is-warning long-notification">
+                Note that for Incus clients on Windows, certain terminal functionality may not work! For Windows, it is recommended to use any SSH connections in the lab instead.
+            </div>
+        </div>
+
+        <div id="ssh-putty" style="display: none;">
+            <h1 class="title">SSH - Putty</h1>
+        </div>
+        <div id="ssh-linux" style="display: none;">
+            <h1 class="title">SSH - OpenSSH/Linux</h1>
+        </div>
+        
+
+        
+    </div>    
+</div>
+
+<script>
+
+    document.lastTab = "incus-client";
+
+    function setup_button(id) {
+        document.getElementById(id).onclick = function(ev) {
+            document.getElementById(document.lastTab).setAttribute("style", "display: none;");
+            document.getElementById(document.lastTab + "-tab").setAttribute("class", "");
+            var item_id = ev.currentTarget.dataset.tab;
+            document.getElementById(item_id).setAttribute("style", "display: block;");
+            ev.currentTarget.setAttribute("class", "is-active");
+            
+            document.lastTab = item_id;
+        }
+    }
+
+    setup_button("incus-client-tab");
+    setup_button("ssh-putty-tab");
+    setup_button("ssh-linux-tab");
+</script>
+{% endblock %}
