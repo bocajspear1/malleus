@@ -70,6 +70,10 @@ def create(request, project):
 
     print(project_name)
 
+    user = client.get_user(request.user.username)
+    if user is not None:
+        user.add_project(project_name)
+
     project = client.get_project(project_name)
     if project is None:
         project = client.create_project(project_name, "", isolate_images=False, isolate_networks=False, isolate_profiles=True, isolate_storage=True, restricted=True, proxy=True)
@@ -116,6 +120,7 @@ def create(request, project):
             print(f"\nGot operation {operation_id}")
             context['operations'][operation_id] = host['hostname']
 
+    context['lab_id'] = cleaned_name
     print(context)
     return render(request, "malleusui/building.html", context)
 
@@ -142,11 +147,24 @@ def manage(request, project):
     project = client.get_project(project_name)
 
     context['lab'] = lab_data.get_dict()
+    context['project_name'] = project_name
+    context['lab_id'] = cleaned_name
+
 
     for i in range(len(context['lab']['hosts'])):
         host = context['lab']['hosts'][i]
         instance = project.get_instance(host['hostname'])
         context['lab']['hosts'][i]['port_forwards'] = {}
+        if not context['lab']['hosts'][i].get("hide_ip", False):
+            state_data = instance.get_state()
+            interface_str = ""
+            for item in state_data['network']:
+                if item in ("lo",):
+                    continue
+                for addr in state_data['network'][item]['addresses']:
+                    if addr['family'] == "inet":
+                        interface_str += f" {item}|{addr['address']}"
+            context['lab']['hosts'][i]['ip_addr'] = interface_str.strip()
         for device in instance.devices:
             if instance.devices[device]['type'] == "proxy":
                listen_split = instance.devices[device]['listen'].split(":")
@@ -193,6 +211,10 @@ def delete(request, project):
     if project is None:
         return HttpResponseNotFound("Project for lab not found")
     
+    user = client.get_user(request.user.username)
+    if user is not None:
+        user.remove_project(project_name)
+    
     for host in lab_data.hosts:
         print(host)
         host_data = project.get_instance(host['hostname'])
@@ -207,6 +229,8 @@ def delete(request, project):
             network.delete()
 
     project.delete()
+
+    return redirect("index") 
 
 
 @login_required

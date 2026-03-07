@@ -3,36 +3,78 @@
 {% block appcontent %}
 <div class="container"><div class="container">
     <div class="section">    
-        <h1 class="is-size-1">{{ lab.name }}</h1>
-
-        {% for host in lab.hosts %}
-
-        <div class="card">
-            <header class="card-header">
-                <p class="card-header-title">{{ host.hostname }}</p>
-                <span class="card-header-icon">
-                    <span class="icon">
-                        <span class="mdi mdi-server"></span>
-                    </span>
-                </span>
-            </header>
-            <div class="card-content">
-                <div class="content">
-                    <ul>
-                    {% for key, data in host.port_forwards.items %}
-                        <li>{{ data.listen }} to internal {{ data.connect_to }} </li>
-                    {% endfor %}
+         <div class="container">
+        <div class="columns">
+            <div class="column is-3 ">
+                <aside class="menu is-hidden-mobile">
+                    <p class="menu-label">
+                        Controls
+                    </p>
+                    <ul class="menu-list">
+                        <li><a href="{%url 'delete' lab_id %}">Delete</a></li>
                     </ul>
-                </div>
+                </aside>
             </div>
-            <!-- <footer class="card-footer">
-                <a href="#" class="card-footer-item">Save</a>
-                <a href="#" class="card-footer-item">Edit</a>
-                <a href="#" class="card-footer-item">Delete</a>
-            </footer> -->
-        </div>
+            <div class="column is-9">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="content">
+                            <div class="block">
+                                <h1 class="title">{{ lab.name }} (ID: {{ lab_id }})</h1>
+                                <div class="block">
+                                    {{ lab.description }}
+                                </div>
+                                <div class="block">
+                                    <strong>Project:</strong> {{ project_name }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="block">
+                    <table class="table is-striped is-hoverable is-fullwidth">
+                        <thead>
+                            <tr>
+                                <th>Hostname</th>
+                                <th>Description</th>
+                                <th>IP</th>
+                                <th>Forwards</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for host in lab.hosts %}
+                            <tr>
+                                <td>{{ host.hostname }}</td>
+                                <td>{{ host.description }}</td>
+                                {% if host.hide_ip %}
+                                <td>---</td>
+                                {% else %}
+                                <td>{{ host.ip_addr }}</td>
+                                {% endif %}
+                                <td>
+                                    <ul>
+                                    {% for key, data in host.port_forwards.items %}
+                                        <li>{{ data.listen }} to internal {{ data.connect_to }} </li>
+                                    {% endfor %}
+                                    </ul>
+                                </td>
+                            </tr>
+            
 
-        {% endfor %}
+                            {% endfor %}
+                            
+                        
+                        </tbody>
+                    </table>
+                </div>
+
+       
+            </div>
+        </div>
+    </div>
+        
+
+        
     </div>    
 </div>
 {% endblock %}

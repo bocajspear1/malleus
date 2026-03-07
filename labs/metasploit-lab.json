@@ -6,6 +6,7 @@
         {
             "template": "kali-metasploit",
             "hostname": "kali",
+            "description": "Linux distro with hacking tools. SSH login is root:kali",
             "networks": [
                 "int"
             ],
@@ -16,6 +17,8 @@
         {
             "template": "tomcat-vuln",
             "hostname": "target",
+            "description": "Target with unknown vulnerabilities",
+            "hide_ip": true,
             "networks": [
                 "int"
             ]

@@ -34,13 +34,15 @@
             
         }
         document.getElementById("progress-bar").setAttribute("value", 100);
-        document.getElementById("status-text").textContent = "Done!";
+        document.getElementById("status-text").textContent = "Done! Redirecting...";
+
+        setTimeout(function() {
+            window.location.replace('{% url 'manage' lab_id %}')
+        }, 3000)
     }
 
     get_statuses();
 
-    console.log("hi there");
-    
 
     
 </script>

@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from .base import IncusBase
 
 class IncusInstance(IncusBase):
@@ -68,6 +70,7 @@ class IncusInstance(IncusBase):
         self._data = {}
         self._devices = {}
         self._project = project
+        self._state = {}
 
 
     @property
@@ -82,12 +85,22 @@ class IncusInstance(IncusBase):
         resp = self._client.get(f"/1.0/instances/{self._name}?project={self._project}")
         if resp.status_code == 200:
             metadata = resp.json()['metadata']
-            print(metadata)
+            # pprint(metadata)
             # self._data = 
             self._devices = metadata['devices']
             return True
         else:
             return False
+        
+    def get_state(self):
+        resp = self._client.get(f"/1.0/instances/{self._name}/state?project={self._project}")
+        if resp.status_code == 200:
+            metadata = resp.json()['metadata']
+            self._state = metadata
+            # pprint(metadata)
+            return self._state
+        else:
+            return None
         
     def _change_state(self, new_state, forced=False):
         resp = self._client.put(f"/1.0/instances/{self._name}/state?project={self._project}", json_data={
@@ -96,7 +109,7 @@ class IncusInstance(IncusBase):
             "timeout": 30,
             "stateful": False
         })
-        print(resp.json())
+        # print(resp.json())
         if resp.status_code == 202:
             operation_id = resp.json()['operation'].split("/")[-1]
             return operation_id

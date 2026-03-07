@@ -4,6 +4,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 import requests
 
 from .project import IncusProject
+from .user import IncusUser
 
 class IncusClient():
 
@@ -61,31 +62,12 @@ class IncusClient():
         print(resp.json())
 
     def get_user(self, username):
-        res = self._get(f"/1.0/certificates?filter=name+eq+{username}&recursion=1")
-
-        res_json = res.json()
-        if len(res_json['metadata']) == 1:
-            return res_json['metadata'][0]
-        elif len(res_json['metadata']) > 1:
-            raise ValueError("Multi users of the same name!")
+        user = IncusUser(self, username)
+        ok = user.load()
+        if ok:
+            return user
         else:
             return None
-        
+
     def create_user_cert(self, username, projects=None):
-        res = self.post("/1.0/certificates", json_data={
-            "name": username,
-            "description": f"User {username}",
-            "token": True,
-            "type": "client",
-            "restricted": True,
-            "trust_token": "",
-            "certificate": "",
-            "trust_token": "",
-            "projects": projects
-        })
-
-        if res.status_code == 202:
-            return res.json()['metadata']['metadata']
-        else:
-            print(res.status_code, res.json())
-            return None
+        return IncusUser.new(self, username, projects=projects)

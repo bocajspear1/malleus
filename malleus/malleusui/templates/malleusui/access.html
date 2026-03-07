@@ -53,6 +53,9 @@
 
                 If the server is at "192.168.9.10":
                 <pre>incus[.exe] remote add malleus 192.168.9.10</pre>
+
+                Then set it to be the default remote:
+                <pre>incus[.exe] remote set-default &lt;NAME&gt;</pre>
             </div>
             <div class="notification is-link long-notification">
                 {{ user_key }}
@@ -86,6 +89,10 @@
         </div>
         <div id="ssh-linux" style="display: none;">
             <h1 class="title">SSH - OpenSSH/Linux</h1>
+            <div class="block">
+                With OpenSSH on Linux, SSH access is simple:
+                <pre>ssh -p &lt;PORT&gt; &lt;USER&gt;@&lt;MALLEUS_IP&gt;</pre>
+            </div>
         </div>
         
 

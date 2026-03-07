@@ -122,7 +122,6 @@ class IncusProject():
         if not ok:
             return None
         else:
-            print("GETNET", net.name, net.internal_name)
             return net
         
     def create_network(self, network_name, description, network_type="bridge", ipv4_addr=None, ipv4_nat=True):
