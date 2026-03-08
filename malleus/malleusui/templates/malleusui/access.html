@@ -1,5 +1,7 @@
 {% extends "malleusui/baseapp.html" %}
 
+{% load static %}
+
 {% block appcontent %}
 <div class="container">
     <div class="section"> 
@@ -22,7 +24,7 @@
                                 <span class="mdi mdi-console-network"></span>
                             </span>
                         </span>
-                        <span>SSH (Putty)</span>
+                        <span>SSH (Putty/Windows)</span>
                     </a>
                 </li>
                 <li data-tab="ssh-linux" id="ssh-linux-tab">
@@ -80,19 +82,53 @@
                 You could replace "bash -i" with any command in the instance.
             </div>
             <div class="notification is-warning long-notification">
-                Note that for Incus clients on Windows, certain terminal functionality may not work! For Windows, it is recommended to use any SSH connections in the lab instead.
+                Note that for Incus clients on Windows, certain terminal functionality may not work! For Windows, it is recommended to use any SSH connections into the lab instead.
             </div>
         </div>
 
         <div id="ssh-putty" style="display: none;">
             <h1 class="title">SSH - Putty</h1>
+            <div class="block">
+                In the main initial menu, set "Host Name or IP Address" to the IP of the Malleus server, set the port to one given in the lab.
+            </div>
+            <div class="block"><img src="{% static 'images/putty-main.png' %}"/></div>
+            <div class="block">
+                Click "Open" and provide the username and password when prompted.
+            </div>
+            <h2 class="subtitle">SOCKS Proxy</h2>
+            <div class="block">
+                Before clicking "Open", go to Connection &gt; SSH &gt; Tunnels.
+            </div>
+            <div class="block"><img src="{% static 'images/putty-proxy-1.png' %}"/></div>
+            <div class="block">
+                <ol>
+                    <li>Ensure "Local ports accept connections from other hosts" and "Remote ports for the same" are checked.</li>
+                    <li>In "Add new forwarded port" put a port (like 8888) in "Source port" and set "Destination" to "Dynamic" without putting anything in the "Destination" textbox.</li>
+                    <li>Click "Add" to insert the port.</li>
+                </ol>
+            </div>
+            <div class="block"><img src="{% static 'images/putty-proxy-2.png' %}"/></div>
+            <div class="block">
+                Click "Open" and provide the username and password when prompted.
+            </div>
+            {% include 'malleusui/proxy_setup.html' %}
         </div>
         <div id="ssh-linux" style="display: none;">
             <h1 class="title">SSH - OpenSSH/Linux</h1>
             <div class="block">
-                With OpenSSH on Linux, SSH access is simple:
+                With OpenSSH on Linux, SSH access is simple, with "PORT" the port given in the lab:
                 <pre>ssh -p &lt;PORT&gt; &lt;USER&gt;@&lt;MALLEUS_IP&gt;</pre>
             </div>
+            <h2 class="subtitle">SOCKS Proxy</h2>
+            <div class="block">
+                Using a proxy via SSH can let you access ports internal to the lab networks. OpenSSH has built in support for SOCKS proxies to do this.
+
+                All you need to do is add the following with you ssh command: 
+                <pre>-D &lt;PORT&gt;</pre>
+
+                Something like "8888" is recommended. Use this port when configuring applications to use the proxy.
+            </div>
+            {% include 'malleusui/proxy_setup.html' %}
         </div>
         
 

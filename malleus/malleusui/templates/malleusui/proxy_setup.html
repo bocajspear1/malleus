@@ -1,0 +1,29 @@
+<div class="block">
+    <h4 class="is-size-4">Setting Up Progams to use SOCKS Proxies</h4>
+</div>
+<div class="notification is-warning long-notification">
+    Note you'll lose internet and Malleus access if you do this on your primary browser. It's recommended using a separate browser for this.
+</div>
+<div class="block">
+    <h5 class="is-size-5">Firefox</h5>
+    See instructions <a href="https://mullvad.net/en/help/socks5-proxy">here</a> 
+
+    <ol>
+        <li>Go to Settings</li>
+        <li>Scroll down until you see "Network Settings" and click the "Settings" button in that section.</li>
+        <li>In the Connections Settings, in "SOCKS Host" put 127.0.0.1 and put the port you configured earlier in the "Port" textbox next to it.</li>
+        <li>Click "OK"</li>
+    </ol>
+</div>
+<div class="block">
+    <h5 class="is-size-5">Chrome/Brave</h5>
+    See instructions <a href="https://mullvad.net/en/help/socks5-proxy">here</a> 
+
+    <ol>
+        <li>Open Chrome/Brave with the following option:
+            <pre> --proxy-server=socks5:127.0.0.1:&lt;PORT&gt;</pre>
+        </li>
+        <li>(Windows): Copy your shortcut to your browser and edit the shortcut</li>
+        <li>(Linux): Call from the command line instead of the application menu.</li>
+    </ol>
+</div>
