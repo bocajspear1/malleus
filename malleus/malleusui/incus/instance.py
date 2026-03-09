@@ -154,4 +154,25 @@ class IncusInstance(IncusBase):
 
         print(resp.status_code, resp.json())
 
+    def get_console(self, command=None, height=24, width=80, term="xterm"):
+        if command is None:
+            command = [
+                "bash"
+            ]
+        resp = self._client.post(f"/1.0/instances/{self._name}/exec?project={self._project}", json_data={
+            "environment": {
+                "TERM": term
+            },
+            "command": command,
+            "interactive": True,
+            "height": int(height),
+            "width": int(width),
+            "wait-for-websocket": True
+        })
+        if resp.status_code == 202:
+            return resp.json()['metadata']
+        else:
+            print(resp.status_code, resp.json())
+            return False
+
 

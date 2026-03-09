@@ -33,6 +33,7 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "malleusui.apps.MalleusUIConfig",
     'django.contrib.admin',
     'django.contrib.auth',
@@ -70,6 +71,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'malleus.wsgi.application'
+ASGI_APPLICATION = 'malleus.asgi.application'
 
 
 # Database

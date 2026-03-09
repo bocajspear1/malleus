@@ -12,7 +12,8 @@
             ],
             "port_forwards": [
                 "tcp:127.0.0.1:22"
-            ]
+            ],
+            "console": true
         },
         {
             "template": "tomcat-vuln",

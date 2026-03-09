@@ -1,0 +1,5 @@
+websockets==16.0
+Django==6.0.2
+channels[daphne]==4.3.2
+tzdata==2025.3
+requests==2.32.5

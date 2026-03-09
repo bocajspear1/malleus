@@ -44,7 +44,19 @@
                         <tbody>
                             {% for host in lab.hosts %}
                             <tr>
-                                <td>{{ host.hostname }}</td>
+                                <td>
+                                    {% if host.console %}
+                                    <a href="{% url 'console' lab_id host.hostname %}">
+                                        
+                                        <span class="icon is-small is-left">
+                                            <span class="mdi mdi-console"></span>
+                                        </span>
+                                        {{ host.hostname }} 
+                                    </a>
+                                    {% else %}
+                                    {{ host.hostname }}
+                                    {% endif %}
+                                </td>
                                 <td>{{ host.description }}</td>
                                 {% if host.hide_ip %}
                                 <td>---</td>

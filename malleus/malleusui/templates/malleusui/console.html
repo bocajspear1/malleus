@@ -1,0 +1,46 @@
+{% extends "malleusui/baseapp.html" %}
+
+{% load static %}
+
+{% block extraheader %}
+<link rel="stylesheet" href="{% static 'css/xterm.css' %}">
+<script src="{% static 'js/xterm.js' %}"></script>
+<script src="{% static 'js/xterm-addon-attach.js' %}"></script>
+<script src="{% static 'js/xterm-addon-fit.js' %}"></script>
+{% endblock %}
+
+{% block appcontent %}
+<div class="container is-fullheight" id="console-wrapper">
+    
+    <div class="section is-fullheight">
+        <div class="block">
+            <h1 class="title">{{ hostname }}</h1>
+        </div>
+        <div id="malleus_console"></div>
+    </div>
+     
+</div>
+<script>
+    term = new Terminal({fontSize: 12});
+    fitAddon = new FitAddon.FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(document.getElementById("malleus_console"));
+    fitAddon.fit();
+
+    var height = term.rows;
+    var width = term.cols;
+    var lab_id = '{{ lab_id }}';
+    var hostname = '{{ hostname }}';
+    sock = new WebSocket("/ws/console/" + lab_id + "/" + hostname + "/?width=" + width + "&height=" + height);
+    sock.onopen = function (e) {
+        attachAddon = new AttachAddon.AttachAddon(sock);
+        term.loadAddon(attachAddon);
+        // $('#tryit_console_reconnect').css("display", "none");
+
+        sock.onclose = function(msg) {
+            term.dispose();
+            // $('#tryit_console_reconnect').css("display", "inherit");
+        };
+    };
+</script>
+{% endblock %}

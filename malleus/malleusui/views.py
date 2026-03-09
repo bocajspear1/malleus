@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.db.utils import IntegrityError
 from django.conf import settings
-from django.http import HttpResponseNotFound, JsonResponse
+from django.http import HttpResponseNotFound, JsonResponse, HttpResponseBadRequest
 
 
 # Create your views here.
@@ -178,6 +178,49 @@ def manage(request, project):
     print(context)
     return render(request, "malleusui/manage.html", context)
 
+@login_required
+def console(request, project, instance_name):
+    context = {}
+
+    loader = LabLoader("../labs")
+    loader.load()
+
+    cleaned_project = re.sub(r"[^a-zA-Z0-9_-]", "", project)
+    cleaned_instance = re.sub(r"[^a-zA-Z0-9_-]", "", instance_name)
+
+    lab_data = loader.get(cleaned_project)
+    if lab_data is None:
+        return HttpResponseNotFound("Lab not found")
+
+    client = IncusClient(settings.INCUS_SERVER, settings.INCUS_CERT, settings.INCUS_KEY, verify=settings.INCUS_VERIFY)
+
+    project_name = f"{request.user.username}--{cleaned_project}"
+
+    project = client.get_project(project_name)
+
+    context['lab'] = lab_data.get_dict()
+    context['project_name'] = project_name
+    context['lab_id'] = cleaned_project
+
+    found = False
+    for i in range(len(context['lab']['hosts'])):
+        if found:
+            continue
+        host = context['lab']['hosts'][i]
+
+        if host['hostname'] == cleaned_instance:
+            found = True
+            context['hostname'] = host['hostname']
+
+            if host.get("console", False) == False:
+                return HttpResponseBadRequest("Console not allowed for " + cleaned_instance)
+        
+    
+    if not found:
+        return HttpResponseNotFound("Instance not found")
+
+    print(context)
+    return render(request, "malleusui/console.html", context)
 
 
 @login_required

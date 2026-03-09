@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="{% static 'css/bulma.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    {% block extraheader %}
+
+    {% endblock %}
   </head>
   <body>
 {% block content %}
