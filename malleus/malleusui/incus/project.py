@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger('IncusProject')
+
 from .instance import IncusInstance
 from .network import IncusNetwork
 
@@ -35,14 +39,14 @@ class IncusProject():
         if snapshots:
             config['config']['restricted.snapshots'] = 'allow'
         resp = client.post(f"/1.0/projects", json_data=config)
-
-        print(resp.status_code, resp.json())
         
         if resp.status_code == 201:
+            logger.info("Created project %s", project_name)
             ret_inst = cls(client, project_name)
             ret_inst.load()
             return ret_inst
         else:
+            logger.error("Creating project failed with code %d: %s", resp.status_code, str(resp.json()))
             return None
 
     def __init__(self, client, project_name="default"):
@@ -55,19 +59,22 @@ class IncusProject():
 
     def load(self):
         resp = self._client.get(f"/1.0/projects/{self._name}")
-        print(resp)
+
         if resp.status_code == 200:
             metadata = resp.json()['metadata']
             self._description = metadata['description']
             self._config = metadata['config']
-            print(self._config)
+
             self._resources = metadata['used_by']
             self._loaded = True
+            logger.info("Loaded project %s", self._name)
             return True
         else:
+            logger.error("Failed to load project %s: %s", self._name, str(resp.json()))
             return False
         
     def delete(self):
+        logger.info("Deleting project %s", self._name)
         resp = self._client.delete(f"/1.0/projects/{self._name}")
         if resp.status_code == 200:
             return True
@@ -101,11 +108,12 @@ class IncusProject():
         internal_network_list = []
         
         for network_name in networks:
-            print("looking for", network_name)
+            logger.debug("Looking for network %s in project", network_name)
             network = self.get_network(network_name)
             if network is None:
-                raise ValueError("Invalid network")
-            print("GOT", network.name, network.internal_name)
+                raise ValueError("Invalid network, unable to find in project")
+            logger.debug("Mapped network %s to %s", network.name, network.internal_name)
+
             internal_network_list.append(network.internal_name)
 
         return IncusInstance.new(self._client, instance_name, f"Instance of {template_name} for project {self._name}", template_name, self._name, vm=vm, networks=internal_network_list)
@@ -116,7 +124,7 @@ class IncusProject():
     def get_network(self, network_name):
         if not self._loaded:
             raise ValueError("Project not loaded")
-        print(network_name)
+
         net = IncusNetwork(self._client, network_name, self._name)
         ok =  net.load()
         if not ok:
@@ -131,7 +139,9 @@ class IncusProject():
             return IncusNetwork.new(self._client, network_name, description, self._name, network_type=network_type, ipv4_addr=ipv4_addr, ipv4_nat=ipv4_nat)
         else:
             new_net = IncusNetwork.new(self._client, network_name, description, self._name, network_type=network_type, ipv4_addr=ipv4_addr, ipv4_nat=ipv4_nat)
-            print("NEW", new_net.name, new_net.internal_name)
+            if new_net is None:
+                logger.error("Failed to create network %s in project %s", network_name, self._name)
+                return None
 
             net_list = [new_net.internal_name]
             if "restricted.networks.access" in self._config:
@@ -152,6 +162,8 @@ class IncusProject():
             "config": self._config
         })
         if resp.status_code == 200:
+            logger.info("Updated config for project %s", self._name)
             return True
         else:
+            logger.error("Failed to update config for project %s", self._name)
             return False

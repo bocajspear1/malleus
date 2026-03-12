@@ -1,4 +1,7 @@
 import hashlib
+import logging
+
+logger = logging.getLogger('IncusNetwork')
 
 class IncusNetwork():
 
@@ -39,9 +42,16 @@ class IncusNetwork():
         else:
             resp = client.post(f"/1.0/networks?project={project}", json_data=net_config)
 
-        ret_inst = cls(client, network_name, project)
-        ret_inst.load()
-        return ret_inst
+        if resp.status_code == 200 or resp.status_code == 201:
+            logger.info("Created network %s with internal name %s", network_name, net_hash)
+            ret_inst = cls(client, network_name, project)
+            ret_inst.load()
+            return ret_inst
+        else:
+            logger.info("Creating network failed with code %d: %s", resp.status_code, str(resp.json()))
+            return None
+
+        
 
 
     def __init__(self, client, network_name, project):
@@ -63,7 +73,6 @@ class IncusNetwork():
         resp = self._client.get(f"/1.0/networks/{self._internal_name}")
         if resp.status_code == 200:
             self._data = resp.json()['metadata']
-            print(self._data)
             return True
         else:
             return False

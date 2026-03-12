@@ -73,6 +73,29 @@ TEMPLATES = [
 WSGI_APPLICATION = 'malleus.wsgi.application'
 ASGI_APPLICATION = 'malleus.asgi.application'
 
+import os
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "{levelname} {asctime}: {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
+
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases

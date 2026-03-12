@@ -4,6 +4,9 @@ import random
 import base64
 import json
 import os
+import logging
+
+logger = logging.getLogger('MalleusViews')
 
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
@@ -37,13 +40,12 @@ def index(request):
         lab = loader.get(lab_name)
         
         for project in projects:
-            print(project, f"{request.user.username}--{lab_name}")
             if project == f"{request.user.username}--{lab_name}":
                 lab.set_running()
         lab_dicts.append(lab.get_dict())
         
     context={'labs': lab_dicts}
-    print(context)
+    logger.debug("Context: %s", str(context))
     return render(request, "malleusui/index.html", context)
 
 @login_required
@@ -68,7 +70,7 @@ def create(request, project):
     
     project_name = f"{request.user.username}--{cleaned_name}"
 
-    print(project_name)
+    logger.info("Creating lab %s with project %s", cleaned_name, project_name)
 
     user = client.get_user(request.user.username)
     if user is not None:
@@ -79,15 +81,16 @@ def create(request, project):
         project = client.create_project(project_name, "", isolate_images=False, isolate_networks=False, isolate_profiles=True, isolate_storage=True, restricted=True, proxy=True)
 
     for network_name in lab_data.networks:
-        print(network_name)
+        
         network = project.get_network(network_name)
         if network is None:
+            logger.info("Adding network %s to project", network_name)
             project.create_network(network_name, f"{network_name} network for lab {cleaned_name}")
+        else:
+            logger.info("Network %s already exists in project", network_name)
 
     for host in lab_data.hosts:
-        print(host)
         host_data = project.get_instance(host['hostname'])
-        print(host_data)
         if host_data is None:
             operation_id, instance = project.create_instance(host['hostname'], host['template'], networks=host['networks'])
             if 'port_forwards' in host:
@@ -97,7 +100,7 @@ def create(request, project):
                     addr = forward_split[1]
                     port_num = int(forward_split[2])
                     name = f"{proto}-{port_num}"
-                    if proto == "tcp" and port_num == 2:
+                    if proto == "tcp" and port_num == 22:
                         name = "ssh-forward"
 
                     found_port = False
@@ -112,16 +115,16 @@ def create(request, project):
                                 found_port = True
                         except OSError:
                             pass
-                    print(f"Adding proxy from {ext_port} to {port_forward}")
+                    logger.info("Adding proxy from %d to %d", ext_port, port_num)
                     instance.add_device(name, "proxy", {
                         "connect": port_forward,
                         "listen": f"{proto}:0.0.0.0:{ext_port}"
                     })
-            print(f"\nGot operation {operation_id}")
+            logger.debug("Got operation %s for instance %s", operation_id, host['hostname'])
             context['operations'][operation_id] = host['hostname']
 
     context['lab_id'] = cleaned_name
-    print(context)
+    logger.debug("Context: %s", str(context))
     return render(request, "malleusui/building.html", context)
 
 
@@ -154,6 +157,11 @@ def manage(request, project):
     for i in range(len(context['lab']['hosts'])):
         host = context['lab']['hosts'][i]
         instance = project.get_instance(host['hostname'])
+        if instance is None:
+            context['lab']['hosts'][i]['running'] = False
+            continue
+        
+        context['lab']['hosts'][i]['running'] = True
         context['lab']['hosts'][i]['port_forwards'] = {}
         if not context['lab']['hosts'][i].get("hide_ip", False):
             state_data = instance.get_state()
@@ -175,7 +183,7 @@ def manage(request, project):
                    "connect_to": f"{connect_split[0]}/{connect_split[2]}"
                }
 
-    print(context)
+    logger.debug("Context: %s", str(context))
     return render(request, "malleusui/manage.html", context)
 
 @login_required
@@ -219,7 +227,7 @@ def console(request, project, instance_name):
     if not found:
         return HttpResponseNotFound("Instance not found")
 
-    print(context)
+    logger.debug("Context: %s", str(context))
     return render(request, "malleusui/console.html", context)
 
 
@@ -259,17 +267,19 @@ def delete(request, project):
         user.remove_project(project_name)
     
     for host in lab_data.hosts:
-        print(host)
         host_data = project.get_instance(host['hostname'])
-        print(host_data)
         if host_data is not None:
+            logger.info("Deleting instance %s", host['hostname'])
             host_data.delete()
+        else:
+            logger.info("Instance %s not found in project", host['hostname'])
     
     for network_name in lab_data.networks:
-        print(network_name)
         network = project.get_network(network_name)
         if network is not None:
-            network.delete()
+            logger.info("Deleting network %s", network_name)
+        else:
+            logger.info("Network %s not found in project", network_name)
 
     project.delete()
 
@@ -295,7 +305,6 @@ def access(request):
         
 
     resp = client.create_user_cert(request.user.username, projects=user_projects)
-    print(resp)
 
     # {"client_name":"testme","fingerprint":"7dfd30939b994ea79db37a1757f6ae4368a2c5f67a2f543270796ea8545dc4a5","addresses":["192.168.6.18:8443","10.20.40.1:8443","[fd42:8149:2634:c3ed::1]:8443","[fd42:60f4:19d5:811c::1]:8443"],"secret":"043784f43f6ed33c2260e9da8b46eec06fda22ebbb8abe52ad9c25b67b7b24f7","expires_at":"0001-01-01T00:00:00Z"}
     
@@ -309,7 +318,7 @@ def access(request):
     data_str = base64.b64encode(json.dumps(data_dict).encode()).decode()
     
     context={'user_key': data_str}
-    print(context)
+    logger.debug("Context: %s", str(context))
     return render(request, "malleusui/access.html", context)   
 
 
@@ -324,7 +333,7 @@ def files(request):
         file_list.append({"path": f"files/{item}", "name": item})
 
     context={'files': file_list}
-    print(context)
+    logger.debug("Context: %s", str(context))
     return render(request, "malleusui/files.html", context)   
 
 def login(request):

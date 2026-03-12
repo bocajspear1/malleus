@@ -1,4 +1,9 @@
 from pprint import pprint
+import json
+import logging
+
+
+logger = logging.getLogger('IncusInstance')
 
 from .base import IncusBase
 
@@ -35,6 +40,7 @@ class IncusInstance(IncusBase):
                 "type": "container",
                 "start": True
         } 
+        logger.debug("Creating instance with config %s", json.dumps(inst_config, indent=4))
 
         if vm:
             inst_config['type'] = 'vm'
@@ -54,11 +60,12 @@ class IncusInstance(IncusBase):
         resp_json = resp.json()
         
         if resp.status_code == 202:
+            logger.info("Created instance %s in project %s", instance_name, project)
             ret_inst = cls(client, instance_name, project)
             ret_inst.load()
             return resp_json['metadata']['id'], ret_inst
         else:
-            print(resp.status_code, resp_json)
+            logger.error("Creating instance failed with code %d: %s", resp.status_code, str(resp.json()))
             return None, None
         
         
@@ -152,7 +159,10 @@ class IncusInstance(IncusBase):
             "devices": devices
         })
 
-        print(resp.status_code, resp.json())
+        if resp.status_code == 200 or resp.status_code == 201:
+            logger.info("Added device %s (%s) to instance %s", name, device_type, self._name)
+        else:
+            logger.error("Failed to add device %s: %s", name, str(resp.json()))
 
     def get_console(self, command=None, height=24, width=80, term="xterm"):
         if command is None:
@@ -170,9 +180,10 @@ class IncusInstance(IncusBase):
             "wait-for-websocket": True
         })
         if resp.status_code == 202:
+            logger.info("Got console for instance %s", self._name)
             return resp.json()['metadata']
         else:
-            print(resp.status_code, resp.json())
+            logger.error("Failed to get console for instance %s: %s", self._name, str(resp.json()))
             return False
 
 

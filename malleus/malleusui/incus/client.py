@@ -59,7 +59,6 @@ class IncusClient():
         
     def await_operation(self, operation_id):
         resp = self.get(f"/1.0/operations/{operation_id}/wait?timeout=-1")
-        print(resp.json())
 
     def get_user(self, username):
         user = IncusUser(self, username)

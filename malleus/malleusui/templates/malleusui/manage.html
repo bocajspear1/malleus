@@ -45,7 +45,7 @@
                             {% for host in lab.hosts %}
                             <tr>
                                 <td>
-                                    {% if host.console %}
+                                    {% if host.console and host.running %}
                                     <a href="{% url 'console' lab_id host.hostname %}">
                                         
                                         <span class="icon is-small is-left">
