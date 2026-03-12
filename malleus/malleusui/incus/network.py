@@ -1,4 +1,5 @@
 import hashlib
+import json
 import logging
 
 logger = logging.getLogger('IncusNetwork')
@@ -21,6 +22,7 @@ class IncusNetwork():
             "name": net_hash,
             "type": network_type
         }
+        logger.debug("Creating network with config %s", json.dumps(net_config, indent=4))
         
         if ipv4_addr is not None:
             net_config['config']['ipv4.address'] = ipv4_addr

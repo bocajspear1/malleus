@@ -1,3 +1,4 @@
+import json
 import logging
 
 logger = logging.getLogger('IncusProject')
@@ -33,6 +34,7 @@ class IncusProject():
             "description": description,
             "name": project_name
         }
+        logger.debug("Creating project with config %s", json.dumps(config, indent=4))
 
         if proxy:
             config['config']['restricted.devices.proxy'] = 'allow'
