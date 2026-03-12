@@ -328,8 +328,10 @@ def files(request):
     static_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "static", "files")
 
     file_list = []
+    raw_list = os.listdir(static_path)
+    raw_list.sort()
 
-    for item in os.listdir(static_path):
+    for item in raw_list:
         file_list.append({"path": f"files/{item}", "name": item})
 
     context={'files': file_list}
