@@ -36,6 +36,14 @@
                         Start
                     </a>
                     {% endif %}
+                    {% if lab.has_docs %}
+                    <a href="{% url 'docs' lab.id %}" class="card-footer-item">
+                        <span class="icon is-medium is-left">
+                            <span class="mdi mdi-notebook"></span>
+                        </span>
+                        Documentation
+                    </a>
+                    {% endif %}
                 </footer>
             </div>
         {% endfor %}

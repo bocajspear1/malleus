@@ -187,3 +187,26 @@ class IncusInstance(IncusBase):
             return False
 
 
+    def run_command(self, command, height=24, width=80, stdout=True, stderr=False):
+        resp = self._client.post(f"/1.0/instances/{self._name}/exec?project={self._project}", json_data={
+            "environment": {
+                
+            },
+            "command": command,
+            "interactive": False,
+            "height": int(height),
+            "width": int(width),
+            "wait-for-websocket": True
+        })
+
+        pprint(resp.json())
+        if resp.status_code == 202:
+            exec_info =  resp.json()['metadata']
+            op_id = exec_info['id']
+            stdout_secret = exec_info['metadata']['fds']['0']
+            stdout_ws = self._client.get_socket(op_id, stdout_secret)
+            output = stdout_ws.recv().decode()
+            return output
+        else:
+            logger.error("Failed to execute command on instance %s: %s", self._name, str(resp.json()))
+            return False

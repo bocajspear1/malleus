@@ -8,6 +8,7 @@ urlpatterns = [
     path("logout", views.logout, name="logout"),
     path("register", views.register, name="register"),
     path("create/<str:project>", views.create, name="create"),
+    path("docs/<str:project>", views.docs, name="docs"),
     path("manage/<str:project>", views.manage, name="manage"),
     path("console/<str:project>/<str:instance_name>", views.console, name="console"),
     path("delete/<str:project>", views.delete, name="delete"),

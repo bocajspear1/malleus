@@ -1,6 +1,7 @@
 {% extends "malleusui/baseapp.html" %}
 
 {% load static %}
+{% load markdownify %}
 
 {% block extraheader %}
 <link rel="stylesheet" href="{% static 'css/xterm.css' %}">
@@ -18,7 +19,35 @@
         </div>
         <div id="malleus_console"></div>
     </div>
-     
+</div>
+<div class="section is-fullheight sidemenu">
+    <div class="card">
+        <header class="card-header">
+            <p class="card-header-title">Documentation</p>
+            <button class="card-header-icon" aria-label="hide Documentation" id="dochide">
+                <span class="icon is-medium is-left">
+                    <span class="mdi mdi-eye" id="docs_display_icon"></span>
+                </span>
+            </button>
+        </header>
+        <div class="card-content" id="docs_content">
+            {% for page in docs %}
+                {% if forloop.counter0 == 0 %}
+                <div class="content active-page" id="page-{{ forloop.counter0 }}" data-haschecks="{{ page.haschecks }}">
+                    {{ page.content | markdownify}}
+                </div>
+                {% else %}
+                <div class="content hide-page" id="page-{{ forloop.counter0 }}" data-haschecks="{{ page.haschecks }}">
+                    {{ page.content | markdownify}}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <footer class="card-footer" id="docs_buttons">
+            <button disabled class="button card-footer-item" id="back-page-button">Back</button>
+            <button class="button card-footer-item" id="next-page-button">Next</button>
+        </footer>
+    </div>
 </div>
 <script>
     term = new Terminal({fontSize: 12});
@@ -42,5 +71,84 @@
             // $('#tryit_console_reconnect').css("display", "inherit");
         };
     };
+
+
+    document.getElementById("dochide").onclick = function() {
+        if (document.getElementById("docs_content").style.display === "none") {
+            document.getElementById("docs_content").style = '';
+            document.getElementById("docs_buttons").style = '';
+            document.getElementById("docs_display_icon").classList.remove("mdi-eye-off");
+            document.getElementById("docs_display_icon").classList.add("mdi-eye");
+        } else {
+            document.getElementById("docs_content").style = 'display: none;';
+            document.getElementById("docs_buttons").style = 'display: none;';
+            document.getElementById("docs_display_icon").classList.remove("mdi-eye");
+            document.getElementById("docs_display_icon").classList.add("mdi-eye-off");
+        }
+    }
+
+    if (document.URL.split('#').length > 1) {
+        setDocPage(0, parseInt(document.URL.split('#')[1]), false);
+        history.replaceState({"lastpage": parseInt(document.URL.split('#')[1]), "first": "there"}, "", document.location.href);
+    } else {
+        history.replaceState({"lastpage": 0, "first": "there"}, "", document.location.href);
+    }
+
+    window.addEventListener("popstate", (event) => {
+        var current_page = document.getElementsByClassName("active-page")[0];
+        var current_id = current_page.id
+        var current_num = parseInt(current_id.split("-")[1]);
+
+        if (!event.state) {
+            setDocPage(current_num, 0, false);
+        } else {
+            setDocPage(current_num, event.state['lastpage'], false);
+        }
+        
+    })
+
+
+    function setDocPage(current_page_num, new_page_num, addHistory) {
+        
+        if (addHistory) {
+            history.pushState({"lastpage": new_page_num}, "", "#" + (new_page_num));
+        }
+
+        var current_page = document.getElementById("page-" + (current_page_num));
+        current_page.classList.add("hide-page");
+        current_page.classList.remove("active-page");
+
+         var new_page = document.getElementById("page-" + (new_page_num));
+        new_page.classList.remove("hide-page");
+        new_page.classList.add("active-page");
+
+        
+
+        if (new_page_num > 0) {
+            document.getElementById("back-page-button").removeAttribute("disabled");
+            var next = document.getElementById("page-" + (new_page_num+1));
+            if (!next) {
+                document.getElementById("next-page-button").setAttribute("disabled", "disabled");
+            } else {
+                document.getElementById("next-page-button").removeAttribute("disabled");
+            }
+        } else {
+            document.getElementById("back-page-button").setAttribute("disabled", "disabled");
+            document.getElementById("next-page-button").removeAttribute("disabled");
+        }
+    }
+
+    document.getElementById("back-page-button").onclick = function() {
+        var current_page = document.getElementsByClassName("active-page")[0];
+        var current_id = current_page.id
+        var current_num = parseInt(current_id.split("-")[1]);
+        setDocPage(current_num, current_num-1, true);
+    }
+    document.getElementById("next-page-button").onclick = function() {
+        var current_page = document.getElementsByClassName("active-page")[0];
+        var current_id = current_page.id
+        var current_num = parseInt(current_id.split("-")[1]);
+        setDocPage(current_num, current_num+1, true);
+    }
 </script>
 {% endblock %}

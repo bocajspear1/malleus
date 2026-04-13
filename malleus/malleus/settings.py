@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'markdownify.apps.MarkdownifyConfig',
 ]
 
 MIDDLEWARE = [
@@ -149,3 +150,31 @@ INCUS_SERVER = "127.0.0.1"
 INCUS_CERT = "/home/jacob/server/cert.pem"
 INCUS_KEY = "/home/jacob/server/client.key"
 INCUS_VERIFY = False
+
+MARKDOWNIFY = {
+    "default": {
+        "MARKDOWN_EXTENSIONS": [
+            "markdown.extensions.fenced_code", # dotted path
+            "fenced_code",  # also works
+        ],
+        "WHITELIST_TAGS": [
+            'a',
+            'abbr',
+            'acronym',
+            'b',
+            'blockquote',
+            'em',
+            'code',
+            'i',
+            'li',
+            'ol',
+            'p',
+            'strong',
+            'ul',
+            "h1",
+            "h2",
+            "h3",
+            "h4"
+        ]
+    }
+}

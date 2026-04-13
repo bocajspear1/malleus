@@ -19,10 +19,11 @@ class LabBuilder():
             self._client
 class Lab():
 
-    def __init__(self, config):
+    def __init__(self, config, lab_path):
         self._id = config['id']
         self._config = config
         self._running = False
+        self._lab_path = lab_path
 
     @property
     def id(self):
@@ -47,6 +48,48 @@ class Lab():
         ret_dict = self._config
         ret_dict['running'] = self._running
         return ret_dict
+    
+    def get_instance_docs(self, instance_name):
+        docs_path = os.path.join(self._lab_path, "docs", instance_name)
+        
+        if os.path.exists(docs_path):
+            doc_list = os.listdir(docs_path)
+            print(doc_list)
+            doc_list.sort()
+            doc_data_list = []
+            for doc_item in doc_list:
+                full_doc_path = os.path.join(docs_path, doc_item)
+                with open(full_doc_path, "r") as doc_file:
+                    doc_contents = doc_file.read()
+                    doc_data_list.append({
+                        "content": doc_contents,
+                        "haschecks": False
+                    })
+
+            return doc_data_list
+
+        
+        return []
+    
+    def get_main_docs(self):
+        docs_path = os.path.join(self._lab_path, "docs", "_main")
+
+        if os.path.exists(docs_path):
+            doc_list = os.listdir(docs_path)
+            doc_list.sort()
+            doc_data_list = []
+            for doc_item in doc_list:
+                full_doc_path = os.path.join(docs_path, doc_item)
+                with open(full_doc_path, "r") as doc_file:
+                    doc_contents = doc_file.read()
+                    doc_data_list.append({
+                        "content": doc_contents,
+                    })
+
+            return doc_data_list
+
+        
+        return []
 
 
 class LabLoader():
@@ -59,12 +102,14 @@ class LabLoader():
         items = os.listdir(self._lab_dir)
         
         for item in items:
-            if item.endswith(".json"):
-                with open(os.path.join(self._lab_dir, item)) as lab_file:
+            lab_path = os.path.join(self._lab_dir, item)
+            lab_file_path = os.path.join(lab_path, "lab.json")
+            if os.path.exists(lab_file_path):
+                with open(lab_file_path) as lab_file:
                     json_data = json.load(lab_file)
                     if 'id' in json_data:
                         
-                        self._labs[json_data['id']] = Lab(json_data)
+                        self._labs[json_data['id']] = Lab(json_data, lab_path)
 
         return list(self._labs.keys())
     

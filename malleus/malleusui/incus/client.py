@@ -2,6 +2,8 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 import requests
+import websockets.sync.client as websocket_client
+import ssl
 
 from .project import IncusProject
 from .user import IncusUser
@@ -70,3 +72,17 @@ class IncusClient():
 
     def create_user_cert(self, username, projects=None):
         return IncusUser.new(self, username, projects=projects)
+    
+    def get_websocket(self, socket_id, socket_secret):
+
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        ssl_context.load_cert_chain(self._session.cert[0], self._session.cert[1])
+
+
+        target_url = f"wss://{self._host}:{self._port}/1.0/operations/{socket_id}/websocket?secret={socket_secret}"
+        return websocket_client.connect(target_url, 
+                    max_size=2097152,
+                    ping_interval=None,
+                    ssl=ssl_context)
