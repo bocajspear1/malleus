@@ -7,6 +7,14 @@
         <div class="columns">
             <div class="column is-3 ">
                 <aside class="menu is-hidden-mobile">
+                    {% if has_docs %}
+                    <p class="menu-label">
+                        Information
+                    </p>
+                    <ul class="menu-list">
+                        <li><a href="{%url 'docs' lab_id %}">Documentation</a></li>
+                    </ul>
+                    {% endif %}
                     <p class="menu-label">
                         Controls
                     </p>

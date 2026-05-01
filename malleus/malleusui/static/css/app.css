@@ -29,3 +29,10 @@ body {
 .hide-page {
   display: none;
 }
+
+#docs_content > div > code {
+  display: block;
+  margin: 20px 0px;
+  padding: 20px 15px;
+  white-space: pre;
+}

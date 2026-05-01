@@ -154,8 +154,7 @@ INCUS_VERIFY = False
 MARKDOWNIFY = {
     "default": {
         "MARKDOWN_EXTENSIONS": [
-            "markdown.extensions.fenced_code", # dotted path
-            "fenced_code",  # also works
+            "extra",
         ],
         "WHITELIST_TAGS": [
             'a',
@@ -174,7 +173,14 @@ MARKDOWNIFY = {
             "h1",
             "h2",
             "h3",
-            "h4"
-        ]
+            "h4",
+            "img"
+        ],
+        "WHITELIST_ATTRS": {
+            'a': ['href', 'title'], 
+            'abbr': ['title'], 
+            'acronym': ['title'],
+            "img": ['src']
+        }
     }
 }

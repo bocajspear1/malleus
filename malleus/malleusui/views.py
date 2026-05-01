@@ -79,8 +79,6 @@ def docs(request, project):
         "lab": lab_dict
     }
 
-    print(context)
-
     return render(request, "malleusui/docs.html", context)
 
     
@@ -109,7 +107,7 @@ def create(request, project):
 
     logger.info("Creating lab %s with project %s", cleaned_name, project_name)
 
-    user = client.get_user()
+    user = client.get_user(cleaned_username(request))
     if user is not None:
         user.add_project(project_name)
 
@@ -189,6 +187,11 @@ def manage(request, project):
     context['lab'] = lab_data.get_dict()
     context['project_name'] = project_name
     context['lab_id'] = cleaned_name
+
+    if len(lab_data.get_main_docs()) > 0:
+        context['has_docs'] = True
+    else:
+        context['has_docs'] = False
 
 
     for i in range(len(context['lab']['hosts'])):
