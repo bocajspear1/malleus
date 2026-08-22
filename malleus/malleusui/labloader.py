@@ -54,7 +54,7 @@ class Lab():
         
         if os.path.exists(docs_path):
             doc_list = os.listdir(docs_path)
-            print(doc_list)
+            
             doc_list.sort()
             doc_data_list = []
             for doc_item in doc_list:

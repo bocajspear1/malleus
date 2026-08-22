@@ -7,25 +7,39 @@
 
 <div class="container" id="lab-docs">
     <div class="section is-fullheight">
-        {% if lab.running %}
-        <a href="{% url 'manage' lab.id %}" class="button m-1">
-            <span class="icon is-large is-left">
-                <span class="mdi mdi-cog"></span>
-            </span>
-            &nbsp;Manage
-        </a>
-        {% else %}
-        <a href="{% url 'create' lab.id %}" class="button m-1">
-            <span class="icon is-large is-left">
-                <span class="mdi mdi-play"></span>
-            </span>
-            &nbsp;Start
-        </a>
-        {% endif %}
+        <h1 class="is-size-3 has-text-centered">Documention for {{ lab.name }}</h1>
+        <nav class="navbar is-dark">
+            <div id="navbarMenu" class="navbar-menu">
+                <div class="navbar-start">
+                    <a class="navbar-item" href="{% url 'index' %}">
+                        <span class="icon is-large is-left">
+                            <span class="mdi mdi-arrow-left"></span>
+                        </span>
+                        Back to Labs
+                    </a>
+                </div>
+                <div class="navbar-end">
+                    {% if lab.running %}
+                    <a class="navbar-item" href="{% url 'manage' lab.id %}">
+                        View Lab
+                        <span class="icon is-large is-right">
+                            <span class="mdi mdi-arrow-right"></span>
+                        </span>
+                    </a>
+                    {% else %}
+                    <a class="navbar-item" href="{% url 'create' lab.id %}">
+                        Start
+                        <span class="icon is-large is-right">
+                            <span class="mdi mdi-play"></span>
+                        </span>
+                        
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+        
         <div class="card">
-            <header class="card-header">
-                <p class="card-header-title">Documentation</p>
-            </header>
             <div class="card-content" id="docs_content">
                 {% for page in lab.docs %}
                     {% if forloop.counter0 == 0 %}
@@ -40,8 +54,19 @@
                 {% endfor %}
             </div>
             <footer class="card-footer" id="docs_buttons">
-                <button disabled class="button card-footer-item" id="back-page-button">Back</button>
-                <button class="button card-footer-item" id="next-page-button">Next</button>
+                <button disabled class="button card-footer-item" id="back-page-button">
+                    <span class="icon is-large is-left">
+                        <span class="mdi mdi-arrow-left"></span>
+                    </span>
+                    &nbsp;&nbsp;Back
+                </button>
+                <button class="button card-footer-item" id="next-page-button">
+                    Next&nbsp;&nbsp;
+                    <span class="icon is-large is-right">
+                        <span class="mdi mdi-arrow-right"></span>
+                    </span>
+                    
+                </button>
             </footer>
         </div>
     </div>   

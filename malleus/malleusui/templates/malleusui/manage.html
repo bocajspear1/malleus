@@ -1,5 +1,11 @@
 {% extends "malleusui/baseapp.html" %}
 
+{% load static %}
+
+{% block extraheader %}
+<script src="{% static 'js/cytoscape.min.js' %}"></script>
+{% endblock %}
+
 {% block appcontent %}
 <div class="container"><div class="container">
     <div class="section">    
@@ -12,34 +18,64 @@
                         Information
                     </p>
                     <ul class="menu-list">
-                        <li><a href="{%url 'docs' lab_id %}">Documentation</a></li>
+                        <li><a href="{%url 'docs' lab_id %}" target="_blank" rel="noopener noreferrer">
+                            <span class="icon is-small is-left">
+                                <span class="mdi mdi-notebook"></span>
+                            </span>
+                            Documentation
+                        </a></li>
                     </ul>
                     {% endif %}
-                    <p class="menu-label">
-                        Controls
-                    </p>
-                    <ul class="menu-list">
-                        <li><a href="{%url 'delete' lab_id %}">Delete</a></li>
-                    </ul>
+                    
                 </aside>
             </div>
             <div class="column is-9">
                 <div class="card">
+                    <header class="card-header">
+                        <p class="card-header-title is-size-4">{{ lab.name }}</p>
+                        <div class="card-header-icon dropdown" aria-label="more options">
+                            <span class="icon">
+                                <span class="mdi mdi-dots-vertical"></span>
+                            </span>
+                            <div class="dropdown-content">
+                                <aside class="menu is-hidden-mobile">
+                                    <p class="menu-label">
+                                        Details
+                                    </p>
+                                    <ul class="menu-list">
+                                        <li><a href="#" class="noclick"><strong>ID:</strong> {{ lab_id }}</a></li>
+                                        <li><a href="#" class="noclick"><strong>Project:</strong> {{ project_name }}</a></li>
+                                    </ul>
+                                    <p class="menu-label">
+                                        Controls
+                                    </p>
+                                    <ul class="menu-list">
+                                        <li>
+                                            <a href="{%url 'delete' lab_id %}" class="has-text-danger">
+                                            <span class="icon is-small is-left ">
+                                                <span class="mdi mdi-delete"></span>
+                                            </span>
+                                            Delete (Can't be undone!)
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </aside>
+                            </div>
+                        </div>
+                        
+                    </header>
                     <div class="card-content">
                         <div class="content">
                             <div class="block">
-                                <h1 class="title">{{ lab.name }} (ID: {{ lab_id }})</h1>
                                 <div class="block">
                                     {{ lab.description }}
-                                </div>
-                                <div class="block">
-                                    <strong>Project:</strong> {{ project_name }}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="block">
+                    {% if lab.display == 'list' %}
                     <table class="table is-striped is-hoverable is-fullwidth">
                         <thead>
                             <tr>
@@ -86,6 +122,52 @@
                         
                         </tbody>
                     </table>
+                    {% else %}
+
+                    <div id="no-details" class="columns">
+                        <div class="column">
+                            <div class="notification is-success">Click on a host to see details</div>
+                        </div>
+                    </div>
+
+                    {% for host in lab.hosts %}
+                    
+                        <div id="{{ host.hostname }}-details" class="columns" style="display:none">
+                            <div class="column is-one-quarter">
+                                <strong>
+                                    {% if host.console and host.running %}
+                                    <a href="{% url 'console' lab_id host.hostname %}">
+                                        
+                                        <span class="icon is-small is-left">
+                                            <span class="mdi mdi-console"></span>
+                                        </span>
+                                        {{ host.hostname }} 
+                                    </a>
+                                    {% else %}
+                                    {{ host.hostname }}
+                                    {% endif %}
+                                    {% if not host.hide_ip %}
+                                    ({{ host.ip_addr }})
+                                    {% endif %}
+                                </strong>
+                            </div>
+                            <div class="column is-half">
+                                {{ host.description }}
+                            </div>
+                            <div class="column is-one-quarter">
+                                <ul>
+                                {% for key, data in host.port_forwards.items %}
+                                    <li class="level-item">{{ data.listen }} to internal {{ data.connect_to }} </li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                    <div id="diagram">
+                        
+                    </div>
+                    {% endif %}
                 </div>
 
        
@@ -94,7 +176,132 @@
     </div>
         
 
-        
+    {% if lab.display == 'diagram' %}
+    <script>
+        var elements = [
+            {% for host in lab.hosts %}
+            {
+                data: { id: '{{ host.hostname }}', type: "host"}
+            },
+            {% for network in host.networks %}
+            {
+                data: { id: '{{ host.hostname }}-connection', source: '{{ host.hostname }}', target: '{{ network }}'}
+            },
+            {% endfor %}
+            {% endfor %}
+            {% for network in lab.networks %}
+            {
+                data: { id: '{{ network }}', type: "network" }
+            },
+            {% endfor %}
+        ];
+
+        var cy = cytoscape({
+            container: document.getElementById('diagram'),
+            elements: elements,
+            style: [ // the stylesheet for the graph
+                {
+                    selector: 'node[type="network"]',
+                    style: {
+                        'background-image': "data:image/png;base64,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",
+                        // 'label': 'data(id)',
+                        // 'color': 'white',
+                        // 'text-valign': 'bottom',
+                        'shape': 'round-rectangle',
+                        'background-fit': 'contain',
+                        'background-opacity': '0%'
+                    }
+                },
+                {
+                    selector: 'node[type="host"]',
+                    style: {
+                        'background-image': 'data:image/png;base64,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',
+                        'label': 'data(id)',
+                        'color': 'white',
+                        'text-valign': 'bottom',
+                        'shape': 'round-rectangle',
+                        'background-fit': 'contain',
+                        'background-opacity': '0%'
+                    }
+                },
+
+                {
+                    selector: 'edge',
+                    style: {
+                        'width': 2,
+                        'line-color': '#ccc',
+                        'target-arrow-color': '#ccc',
+                        'target-arrow-shape': 'none',
+                        'curve-style': 'bezier'
+                    }
+                }
+            ],
+            layout: {
+                name: 'breadthfirst',
+                spacingFactor: 0.75
+            },
+            userZoomingEnabled: false,
+            userPanningEnabled: false
+        });
+
+        var last_node = null;
+
+        function show_node_details(node_id) {
+            console.log(node_id + "-details");
+            var elem = document.getElementById(node_id + "-details");
+            if (elem != null) {
+                elem.style.display = 'flex';
+            }
+            
+        }
+
+        function hide_node_details(node_id) {
+            var elem = document.getElementById(node_id + "-details");
+             if (elem != null) {
+                elem.style.display = 'none';
+            }
+        }
+
+        cy.on('tap', function(event){
+            var target = event.target;
+
+            console.log(target)
+
+            if (target == cy) {
+                console.log("outside")
+                if (last_node != null) {
+                    last_node.style('border-width', '0px');
+                    last_node.style('border-color', 'red');
+                    hide_node_details(last_node.id());
+                } else {
+                    
+                }
+                show_node_details("no");
+                last_node = null;
+            } else if (target.isNode()) {
+                var node = target;
+                console.log(node.json())
+                if (node.json()['data']['type'] == 'network') {
+                    return;
+                }
+                if (last_node != null) {
+                    last_node.style('border-width', '0px');
+                    last_node.style('border-color', 'red');
+                    hide_node_details(last_node.id());
+                } else {
+                    hide_node_details("no");
+                }
+                node.style('border-width', '1px');
+                node.style('border-color', 'red');
+                show_node_details(node.id());
+                
+                last_node = node;
+            }
+            cy.resize();
+            
+        });
+    </script>
+    {% endif %}
     </div>    
 </div>
 {% endblock %}

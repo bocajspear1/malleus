@@ -199,7 +199,7 @@ class IncusInstance(IncusBase):
             "wait-for-websocket": True
         })
 
-        pprint(resp.json())
+        # pprint(resp.json())
         if resp.status_code == 202:
             exec_info =  resp.json()['metadata']
             op_id = exec_info['id']

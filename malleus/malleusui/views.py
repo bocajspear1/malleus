@@ -22,9 +22,7 @@ from django.http import HttpResponse
 
 from .labloader import LabLoader
 from .incus.client import IncusClient
-
-def cleaned_username(request):
-    return re.sub(r"[^_a-zA-Z0-9-]", "_", request.user.username)
+from .helpers import cleaned_username
 
 @login_required
 def index(request):
@@ -41,7 +39,7 @@ def index(request):
         lab = loader.get(lab_name)
         
         for project in projects:
-            if project == f"{cleaned_username(request)}--{lab_name}":
+            if project == f"{cleaned_username(request.user.username)}--{lab_name}":
                 lab.set_running()
         
         lab_dict = lab.get_dict()
@@ -68,7 +66,7 @@ def docs(request, project):
 
     client = IncusClient(settings.INCUS_SERVER, settings.INCUS_CERT, settings.INCUS_KEY, verify=settings.INCUS_VERIFY)
 
-    project = client.get_project(f"{cleaned_username(request)}--{lab_data.id}")
+    project = client.get_project(f"{cleaned_username(request.user.username)}--{lab_data.id}")
     if project is not None:
         lab_data.set_running()
 
@@ -103,11 +101,11 @@ def create(request, project):
         }
     }
     
-    project_name = f"{cleaned_username(request)}--{cleaned_name}"
+    project_name = f"{cleaned_username(request.user.username)}--{cleaned_name}"
 
     logger.info("Creating lab %s with project %s", cleaned_name, project_name)
 
-    user = client.get_user(cleaned_username(request))
+    user = client.get_user(cleaned_username(request.user.username))
     if user is not None:
         user.add_project(project_name)
 
@@ -180,7 +178,7 @@ def manage(request, project):
 
     client = IncusClient(settings.INCUS_SERVER, settings.INCUS_CERT, settings.INCUS_KEY, verify=settings.INCUS_VERIFY)
 
-    project_name = f"{cleaned_username(request)}--{cleaned_name}"
+    project_name = f"{cleaned_username(request.user.username)}--{cleaned_name}"
 
     project = client.get_project(project_name)
 
@@ -223,6 +221,8 @@ def manage(request, project):
                    "connect_to": f"{connect_split[0]}/{connect_split[2]}"
                }
 
+    if 'display' not in context['lab']:
+        context['lab']['display'] = 'list'
     logger.debug("Context: %s", str(context))
     return render(request, "malleusui/manage.html", context)
 
@@ -242,7 +242,7 @@ def console(request, project, instance_name):
 
     client = IncusClient(settings.INCUS_SERVER, settings.INCUS_CERT, settings.INCUS_KEY, verify=settings.INCUS_VERIFY)
 
-    project_name = f"{cleaned_username(request)}--{cleaned_project}"
+    project_name = f"{cleaned_username(request.user.username)}--{cleaned_project}"
 
     project = client.get_project(project_name)
 
@@ -298,13 +298,13 @@ def delete(request, project):
 
     client = IncusClient(settings.INCUS_SERVER, settings.INCUS_CERT, settings.INCUS_KEY, verify=settings.INCUS_VERIFY)
 
-    project_name = f"{cleaned_username(request)}--{cleaned_name}"
+    project_name = f"{cleaned_username(request.user.username)}--{cleaned_name}"
 
     project = client.get_project(project_name)
     if project is None:
         return HttpResponseNotFound("Project for lab not found")
     
-    user = client.get_user(cleaned_username(request))
+    user = client.get_user(cleaned_username(request.user.username))
     if user is not None:
         user.remove_project(project_name)
     
@@ -342,16 +342,16 @@ def access(request):
     for lab_name in labs:
         lab = loader.get(lab_name)
         for project in projects:
-            if project == f"{cleaned_username(request)}--{lab_name}":
+            if project == f"{cleaned_username(request.user.username)}--{lab_name}":
                 user_projects.append(project)
         
 
-    resp = client.create_user_cert(cleaned_username(request), projects=user_projects)
+    resp = client.create_user_cert(cleaned_username(request.user.username), projects=user_projects)
 
     # {"client_name":"testme","fingerprint":"7dfd30939b994ea79db37a1757f6ae4368a2c5f67a2f543270796ea8545dc4a5","addresses":["192.168.6.18:8443","10.20.40.1:8443","[fd42:8149:2634:c3ed::1]:8443","[fd42:60f4:19d5:811c::1]:8443"],"secret":"043784f43f6ed33c2260e9da8b46eec06fda22ebbb8abe52ad9c25b67b7b24f7","expires_at":"0001-01-01T00:00:00Z"}
     
 
-    data_dict = {"client_name": cleaned_username(request),
+    data_dict = {"client_name": cleaned_username(request.user.username),
                  "fingerprint":resp['fingerprint'],
                  "addresses":resp['addresses'],
                  "secret":resp['secret'],

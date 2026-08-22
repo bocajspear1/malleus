@@ -1,50 +1,65 @@
 {% extends "malleusui/base.html" %}
 
+{% load static %}
+
 {% block content %}
-<nav class="navbar is-info">
+<nav class="navbar is-primary">
     <div class="container">
         <div class="navbar-brand">
-            <span class="navbar-item" href="#">
+            <a class="navbar-item" href="{% url 'index' %}">
+                <img src="{% static 'images/hammer.png' %}"/>
                 Malleus
-            </span>
+            </a>
             <!-- <span class="navbar-burger burger" data-target="navbarMenu">
             <span></span>
             <span></span>
             <span></span>
             </span> -->
         </div>
-    <div id="navbarMenu" class="navbar-menu">
-        <div class="navbar-end">
-            <a class="navbar-item" href="{% url 'index' %}">
-                Labs
-            </a>
-            <a class="navbar-item" href="{% url 'files' %}">
-                Files
-            </a>
-            <a class="navbar-item" href="{% url 'access' %}">
-                Access
-            </a>
-            <a class="navbar-item" href="{% url 'logout' %}">
-                Logout
-            </a>
-            
-            <!-- <a class="navbar-item">
-                Examples
-            </a>
-            <a class="navbar-item">
-                Features
-            </a>
-            <a class="navbar-item">
-                Team
-            </a>
-            <a class="navbar-item">
-                Archives
-            </a>
-            <a class="navbar-item">
-                Help
-            </a> -->
+        <div id="navbarMenu" class="navbar-menu">
+            <div class="navbar-end">
+                <a class="navbar-item" href="{% url 'index' %}">
+                    <span class="icon is-small is-left">
+                        <span class="mdi mdi-console-network"></span>
+                    </span>
+                    Labs
+                </a>
+                <a class="navbar-item" href="{% url 'files' %}">
+                    <span class="icon is-small is-left">
+                        <span class="mdi mdi-file-download"></span>
+                    </span>
+                    Files
+                </a>
+                <a class="navbar-item" href="{% url 'access' %}">
+                    <span class="icon is-small is-left">
+                        <span class="mdi mdi-remote-desktop"></span>
+                    </span>
+                    Access
+                </a>
+                <a class="navbar-item" href="{% url 'logout' %}">
+                    <span class="icon is-small is-left">
+                        <span class="mdi mdi-logout"></span>
+                    </span>
+                    Logout
+                </a>
+                
+                <!-- <a class="navbar-item">
+                    Examples
+                </a>
+                <a class="navbar-item">
+                    Features
+                </a>
+                <a class="navbar-item">
+                    Team
+                </a>
+                <a class="navbar-item">
+                    Archives
+                </a>
+                <a class="navbar-item">
+                    Help
+                </a> -->
+            </div>
         </div>
-    </div>
     </div>
 </nav>
 

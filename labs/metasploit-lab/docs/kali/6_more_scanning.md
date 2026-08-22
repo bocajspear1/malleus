@@ -8,3 +8,5 @@ This will get you a lot more information about the service, as this time, a full
 ```
 nmap -p- -sV -sC TARGET
 ```
+
+This should give you a lot more information on the services on the target.

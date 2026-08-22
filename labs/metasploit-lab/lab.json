@@ -2,6 +2,7 @@
     "id": "metasploit-lab",
     "name": "Metasploit Lab",
     "description": "Learn the basics of recon tools like NMap and using Metasploit to exploit and explore a vulnerable target",
+    "display": "diagram",
     "hosts":[ 
         {
             "template": "kali-metasploit",
