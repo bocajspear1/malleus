@@ -1,0 +1,71 @@
+{% extends "malleusui/baseapp.html" %}
+
+{% block appcontent %}
+
+<div class="container">
+    <div class="section">
+        <div class="columns">
+            <div class="column has-text-centered">
+            <h1 class="title" style="color: ghostwhite;">Host Resources</h1><br>
+            </div>
+        </div>
+        <div class="row is-multiline p-4">
+            <table class="table is-fullwidth">
+                <tbody>
+                    <tr>
+                        <td style="width: 30%;">CPU % [{{ cpu_percent }}%, {{ cpu_count }} CPUs]</td>
+                        <td><progress class="progress is-primary" value="{{ cpu_percent }}" max="100"></progress></td>
+                    </tr>
+                    <tr>
+                        <td>Disk Usage [{{ disk_used }} / {{ disk_total }}]</td>
+                        <td><progress class="progress is-info" value="{{ disk_percent }}" max="100"></progress></td>
+                    </tr>
+                    <tr>
+                        <td>Memory Usage [{{ memory_used }} / {{ memory_total }}]</td>
+                        <td><progress class="progress is-success" value="{{ memory_percent }}" max="100"></progress></td>
+                    </tr>
+            </table>
+            
+        </div>
+        <div class="row is-multiline">
+            
+        {% for username, user_values in users.items %}
+            <div class="card is-fullwidth">
+                <header class="card-header">
+                    <p class="card-header-title">{{ username }}</p>
+                </header>
+                <div class="card-content">
+                    <div class="content">
+                        <div class="grid">
+                            {% for project, project_values in user_values.items %}
+                            <div class="card">
+                                <header class="card-header">
+                                    <p class="card-header-title">{{ project }}</p>
+                                </header>
+                                <div class="card-content">
+                                    <div class="content">
+                                    {% for instance, instance_values in project_values.items %}
+                                        <p>
+                                            <h6>{{ instance }}</h6>
+                                        </p>
+                                        <ul>
+                                            {% for key, value in instance_values.items %}
+                                            <li><strong>{{ key }}</strong>: {{ value }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                    </div>
+                </div>
+                
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

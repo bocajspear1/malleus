@@ -4,6 +4,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 import requests
 import websockets.sync.client as websocket_client
 import ssl
+import time
+
+from prometheus_client.parser import text_string_to_metric_families
 
 from .project import IncusProject
 from .user import IncusUser
@@ -72,6 +75,28 @@ class IncusClient():
 
     def create_user_cert(self, username, projects=None):
         return IncusUser.new(self, username, projects=projects)
+
+    def get_metrics(self):
+        
+        resp = self.get(f"/1.0/metrics?_t={time.time()}")
+
+        metric_map = {}
+        
+        for family in text_string_to_metric_families(resp.text):
+            for sample in family.samples:
+                if sample.name not in metric_map:
+                    metric_map[sample.name] = {}
+                
+                if 'project' in sample.labels:
+                    project = sample.labels['project']
+                    item_name = sample.labels['name']
+                    if project not in metric_map[sample.name]:
+                        metric_map[sample.name][project] = {}
+                    metric_map[sample.name][project][item_name] = sample.value
+                else:
+                    print("Name: {0} Labels: {1} Value: {2}".format(*sample))
+
+        return metric_map
     
     def get_websocket(self, socket_id, socket_secret):
 

@@ -12,7 +12,21 @@
 
 {% block appcontent %}
 <div class="container is-fullheight" id="console-wrapper">
-    
+    <nav class="navbar is-dark">
+            <div id="navbarMenu" class="navbar-menu">
+                <div class="navbar-start">
+                    <a class="navbar-item" href="{% url 'manage' lab.id %}">
+                        <span class="icon is-large is-left">
+                            <span class="mdi mdi-arrow-left"></span>
+                        </span>
+                        Back to Lab
+                    </a>
+                </div>
+                <div class="navbar-end">
+                    
+                </div>
+            </div>
+        </nav>
     <div class="section is-fullheight">
         <div class="block">
             <h1 class="title">{{ hostname }}</h1>

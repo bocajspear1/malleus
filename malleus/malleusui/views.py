@@ -5,13 +5,15 @@ import base64
 import json
 import os
 import logging
+import psutil
 
 logger = logging.getLogger('MalleusViews')
 
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
+from django.contrib.admin.views.decorators import staff_member_required
 from django.db.utils import IntegrityError
 from django.conf import settings
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponseBadRequest
@@ -410,3 +412,61 @@ def register(request):
     else:
         context={}
         return render(request, "malleusui/register.html", context)
+
+@staff_member_required
+def resources(request):
+    User = get_user_model()
+    user_list = User.objects.all()
+    
+    context={
+        "users": {}
+    }
+    
+    client = IncusClient(settings.INCUS_SERVER, settings.INCUS_CERT, settings.INCUS_KEY, verify=settings.INCUS_VERIFY)
+
+    metrics = client.get_metrics()
+
+    context['cpu_count'] = psutil.cpu_count()
+    context['cpu_percent'] = psutil.cpu_percent(interval=1)
+    disk_usage = psutil.disk_usage('/')
+    context['disk_total'] = f"{round(disk_usage.total / 1000000000, 1)}GB"
+    context['disk_used'] = f"{round(disk_usage.used / 1000000000, 1)}GB"
+    context['disk_percent'] = disk_usage.percent
+    mem_usage = psutil.virtual_memory()
+    context['memory_total'] = f"{round(mem_usage.total / 1000000000, 1)}GB"
+    context['memory_used'] = f"{round(mem_usage.used / 1000000000, 1)}GB"
+    context['memory_percent'] = mem_usage.percent
+
+    from pprint import pprint
+    # pprint(metrics)
+    projects = client.get_projects()
+
+    for project_name in projects:
+        if project_name == "default":
+            continue
+
+        for user in user_list:
+            username = cleaned_username(user.get_username())
+
+            if username not in context['users']:
+                context['users'][username] = {}
+
+            if project_name.startswith(f"{username}--"):
+                project_obj = {}
+
+                mem_totals = metrics['incus_memory_MemTotal_bytes'][project_name]
+                mem_available = metrics['incus_memory_MemAvailable_bytes'][project_name]
+
+
+                
+                for instance_name in mem_totals:
+                    if instance_name not in project_obj:
+                        project_obj[instance_name] = {}
+
+                    project_obj[instance_name]['memory_usage'] = f"{round((mem_totals[instance_name] - mem_available[instance_name]) / 1000000, 1)}MB"
+
+                context['users'][username][project_name] = project_obj
+
+    pprint(context)
+
+    return render(request, "malleusui/resources.html", context)

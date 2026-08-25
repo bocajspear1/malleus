@@ -36,28 +36,20 @@
                     </span>
                     Access
                 </a>
+                {% if user.is_superuser %}
+                <a class="navbar-item" href="{% url 'resources' %}">
+                    <span class="icon is-small is-left">
+                        <span class="mdi mdi-chart-pie"></span>
+                    </span>
+                    Resources
+                </a>
+                {% endif %}
                 <a class="navbar-item" href="{% url 'logout' %}">
                     <span class="icon is-small is-left">
                         <span class="mdi mdi-logout"></span>
                     </span>
                     Logout
                 </a>
-                
-                <!-- <a class="navbar-item">
-                    Examples
-                </a>
-                <a class="navbar-item">
-                    Features
-                </a>
-                <a class="navbar-item">
-                    Team
-                </a>
-                <a class="navbar-item">
-                    Archives
-                </a>
-                <a class="navbar-item">
-                    Help
-                </a> -->
             </div>
         </div>
     </div>

@@ -15,4 +15,5 @@ urlpatterns = [
     path("wait/<str:operation_id>", views.wait, name="wait"),
     path("access", views.access, name="access"),
     path("files", views.files, name="files"),
+    path("resources", views.resources, name="resources"),
 ]

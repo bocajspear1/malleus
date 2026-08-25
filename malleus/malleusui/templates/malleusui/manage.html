@@ -90,7 +90,7 @@
                             <tr>
                                 <td>
                                     {% if host.console and host.running %}
-                                    <a href="{% url 'console' lab_id host.hostname %}">
+                                    <a href="{% url 'console' lab_id host.hostname %}" target="_blank" rel="noopener noreferrer">
                                         
                                         <span class="icon is-small is-left">
                                             <span class="mdi mdi-console"></span>
@@ -136,7 +136,7 @@
                             <div class="column is-one-quarter">
                                 <strong>
                                     {% if host.console and host.running %}
-                                    <a href="{% url 'console' lab_id host.hostname %}">
+                                    <a href="{% url 'console' lab_id host.hostname %}" target="_blank" rel="noopener noreferrer">
                                         
                                         <span class="icon is-small is-left">
                                             <span class="mdi mdi-console"></span>
@@ -179,21 +179,23 @@
     {% if lab.display == 'diagram' %}
     <script>
         var elements = [
-            {% for host in lab.hosts %}
-            {
-                data: { id: '{{ host.hostname }}', type: "host"}
-            },
-            {% for network in host.networks %}
-            {
-                data: { id: '{{ host.hostname }}-connection', source: '{{ host.hostname }}', target: '{{ network }}'}
-            },
-            {% endfor %}
-            {% endfor %}
             {% for network in lab.networks %}
             {
-                data: { id: '{{ network }}', type: "network" }
+                data: { id: '{{ network }}', type: "network", weight: 1 }
             },
             {% endfor %}
+            {% for host in lab.hosts %}
+            {% for network in host.networks %}
+            {
+                data: { id: '{{ host.hostname }}-connection-{{ forloop.counter }}', target: '{{ host.hostname }}', source: '{{ network }}'}
+            },
+            {% endfor %}
+            {
+                data: { id: '{{ host.hostname }}', type: "host", weight: 2 }
+            },
+            
+            {% endfor %}
+            
         ];
 
         var cy = cytoscape({
@@ -231,6 +233,7 @@
                         'width': 2,
                         'line-color': '#ccc',
                         'target-arrow-color': '#ccc',
+                        // 'target-arrow-shape': 'triangle',
                         'target-arrow-shape': 'none',
                         'curve-style': 'bezier'
                     }
@@ -238,7 +241,10 @@
             ],
             layout: {
                 name: 'breadthfirst',
-                spacingFactor: 0.75
+                spacingFactor: 0.75,
+                depthSort: function(a,b) {
+                    return a.data('weight') + b.data('weight')
+                }
             },
             userZoomingEnabled: false,
             userPanningEnabled: false
@@ -247,7 +253,6 @@
         var last_node = null;
 
         function show_node_details(node_id) {
-            console.log(node_id + "-details");
             var elem = document.getElementById(node_id + "-details");
             if (elem != null) {
                 elem.style.display = 'flex';
@@ -265,8 +270,6 @@
         cy.on('tap', function(event){
             var target = event.target;
 
-            console.log(target)
-
             if (target == cy) {
                 console.log("outside")
                 if (last_node != null) {
@@ -280,7 +283,7 @@
                 last_node = null;
             } else if (target.isNode()) {
                 var node = target;
-                console.log(node.json())
+
                 if (node.json()['data']['type'] == 'network') {
                     return;
                 }
