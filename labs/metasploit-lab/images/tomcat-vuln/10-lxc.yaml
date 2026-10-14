@@ -1,0 +1,8 @@
+network:
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: false
+      dhcp-identifier: mac
+      addresses:
+          - 192.168.3.10/24

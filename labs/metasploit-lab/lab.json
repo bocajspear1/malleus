@@ -7,7 +7,7 @@
         {
             "template": "kali-metasploit",
             "hostname": "kali",
-            "description": "Linux distro with hacking tools. SSH login is root:kali",
+            "description": "Linux distro with hacking tools. SSH login is root:MetasploitH@ckz",
             "networks": [
                 "int"
             ],

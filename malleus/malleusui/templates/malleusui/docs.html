@@ -7,7 +7,7 @@
 
 <div class="container" id="lab-docs">
     <div class="section is-fullheight">
-        <h1 class="is-size-3 has-text-centered">Documention for {{ lab.name }}</h1>
+        <!-- <h1 class="is-size-3 has-text-centered">Documention for {{ lab.name }}</h1> -->
         <nav class="navbar is-dark">
             <div id="navbarMenu" class="navbar-menu">
                 <div class="navbar-start">
@@ -40,34 +40,38 @@
         </nav>
         
         <div class="card">
-            <div class="card-content" id="docs_content">
-                {% for page in lab.docs %}
-                    {% if forloop.counter0 == 0 %}
-                    <div class="content active-page" id="page-{{ forloop.counter0 }}">
-                        {{ page.content | markdownify}}
+            
+            <div class="card-content">
+                <div class="columns">
+                    <div class="column is-1">
+                        <button disabled class="button sidebar-button" id="back-page-button">
+                            <span class="icon is-large is-left">
+                                <span class="mdi mdi-arrow-left"></span>
+                            </span>
+                        </button>
                     </div>
-                    {% else %}
-                    <div class="content hide-page" id="page-{{ forloop.counter0 }}">
-                        {{ page.content | markdownify}}
+                    <div class="column" id="docs_content">
+                    {% for page in lab.docs %}
+                        {% if forloop.counter0 == 0 %}
+                        <div class="content active-page" id="page-{{ forloop.counter0 }}">
+                            {{ page.content | markdownify}}
+                        </div>
+                        {% else %}
+                        <div class="content hide-page" id="page-{{ forloop.counter0 }}">
+                            {{ page.content | markdownify}}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
                     </div>
-                    {% endif %}
-                {% endfor %}
+                    <div class="column is-1">
+                        <button class="button sidebar-button" id="next-page-button">
+                            <span class="icon is-large is-right">
+                                <span class="mdi mdi-arrow-right"></span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
             </div>
-            <footer class="card-footer" id="docs_buttons">
-                <button disabled class="button card-footer-item" id="back-page-button">
-                    <span class="icon is-large is-left">
-                        <span class="mdi mdi-arrow-left"></span>
-                    </span>
-                    &nbsp;&nbsp;Back
-                </button>
-                <button class="button card-footer-item" id="next-page-button">
-                    Next&nbsp;&nbsp;
-                    <span class="icon is-large is-right">
-                        <span class="mdi mdi-arrow-right"></span>
-                    </span>
-                    
-                </button>
-            </footer>
         </div>
     </div>   
 </div>

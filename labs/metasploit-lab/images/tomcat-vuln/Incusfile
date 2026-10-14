@@ -1,0 +1,22 @@
+FROM images:ubuntu/jammy
+
+RUN sleep 10 && echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+
+RUN apt-get update && apt-get install -y openjdk-8-jre-headless unzip wget openssh-server nginx
+
+RUN systemctl enable --now nginx && systemctl enable --now ssh
+
+WORKDIR /opt
+
+RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.0/bin/apache-tomcat-8.5.0.zip
+
+RUN unzip apache-tomcat-8.5.0.zip && rm *.zip && mv apache-tomcat-* apache-tomcat && \
+    chmod +x /opt/apache-tomcat/bin/*.sh 
+
+COPY tomcat.service /etc/systemd/system/tomcat.service
+
+RUN systemctl daemon-reload && systemctl enable --now tomcat
+
+COPY 10-lxc.yaml /etc/netplan/10-lxc.yaml
+
+RUN chmod 600 /etc/netplan/10-lxc.yaml && netplan apply

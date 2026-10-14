@@ -1,0 +1,11 @@
+FROM images:kali/current
+
+RUN sleep 10 && echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+
+RUN apt-get update && apt-get install -y metasploit-framework nmap openssh-server
+
+RUN echo 'root:MetasploitH@ckz' | chpasswd && sed -E -i 's/[#]{0,1}PermitRootLogin .*$/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+COPY interfaces /etc/network/interfaces
+
+RUN systemctl restart networking && systemctl enable --now ssh && echo "" > /etc/resolv.conf
