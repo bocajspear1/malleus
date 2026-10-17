@@ -437,8 +437,6 @@ def resources(request):
     context['memory_used'] = f"{round(mem_usage.used / 1000000000, 1)}GB"
     context['memory_percent'] = mem_usage.percent
 
-    from pprint import pprint
-    # pprint(metrics)
     projects = client.get_projects()
 
     for project_name in projects:
@@ -466,7 +464,5 @@ def resources(request):
                     project_obj[instance_name]['memory_usage'] = f"{round((mem_totals[instance_name] - mem_available[instance_name]) / 1000000, 1)}MB"
 
                 context['users'][username][project_name] = project_obj
-
-    pprint(context)
 
     return render(request, "malleusui/resources.html", context)
